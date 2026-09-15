@@ -82,6 +82,22 @@ body {
   outline-offset: 2px;
 }
 
+.contact-link {
+  margin-top: 1rem;
+  color: var(--muted);
+  text-decoration: none;
+  font-size: 0.9rem;
+}
+
+.contact-link:hover {
+  color: var(--orange);
+}
+
+.contact-link:focus-visible {
+  outline: 2px solid var(--orange);
+  outline-offset: 2px;
+}
+
 @keyframes fade-in-up {
   from {
     opacity: 0;
