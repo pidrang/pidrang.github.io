@@ -1,0 +1,104 @@
+name: Deploy demos
+
+on:
+  workflow_dispatch:
+    inputs:
+      run-id:
+        description: Run id of a manual "Demo artifacts" run in pidrang/pidrang.
+        required: true
+        type: string
+
+permissions:
+  contents: write
+  pull-requests: write
+
+env:
+  SOURCE_REPOSITORY: pidrang/pidrang
+  SOURCE_WORKFLOW_PATH: .github/workflows/demo-artifacts.yml
+  ORIGIN: https://pidrang.dev
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Check the source run
+        env:
+          GH_TOKEN: ${{ secrets.MONOREPO_READ_TOKEN || github.token }}
+          RUN_ID: ${{ inputs.run-id }}
+        run: |
+          set -euo pipefail
+          case "$RUN_ID" in
+            ''|*[!0-9]*) echo "run-id must be a number" >&2; exit 1 ;;
+          esac
+          run=$(gh api "repos/$SOURCE_REPOSITORY/actions/runs/$RUN_ID")
+          echo "$run" | jq -e --arg path "$SOURCE_WORKFLOW_PATH" --arg repo "$SOURCE_REPOSITORY" '
+            .event == "workflow_dispatch"
+            and .conclusion == "success"
+            and (.path | startswith($path))
+            and .head_repository.full_name == $repo
+          ' > /dev/null || { echo "The run is not a successful manual Demo artifacts run of $SOURCE_REPOSITORY" >&2; exit 1; }
+          name=$(gh api "repos/$SOURCE_REPOSITORY/actions/runs/$RUN_ID/artifacts" --jq '[.artifacts[] | select((.name | startswith("demos-")) and (.expired | not))] | if length == 1 then .[0].name else empty end')
+          test -n "$name" || { echo "Expected exactly one unexpired demos-* artifact" >&2; exit 1; }
+          echo "ARTIFACT_NAME=$name" >> "$GITHUB_ENV"
+
+      - name: Download the artifact
+        env:
+          GH_TOKEN: ${{ secrets.MONOREPO_READ_TOKEN || github.token }}
+          RUN_ID: ${{ inputs.run-id }}
+        run: |
+          set -euo pipefail
+          gh run download "$RUN_ID" --repo "$SOURCE_REPOSITORY" --name "$ARTIFACT_NAME" --dir incoming
+
+      - name: Verify the artifact
+        run: |
+          set -euo pipefail
+          sha="${ARTIFACT_NAME#demos-}"
+          jq -e --arg sha "$sha" --arg origin "$ORIGIN" --arg repo "$SOURCE_REPOSITORY" '
+            .schema == 1
+            and .source.repository == $repo
+            and .source.commit == $sha
+            and .source.dirty == false
+            and .origin == $origin
+          ' incoming/metadata.json > /dev/null || { echo "metadata.json does not match the run" >&2; exit 1; }
+          for demo in demo-material demo-tailwind; do
+            test -f "incoming/$demo/index.html" || { echo "$demo/index.html is missing" >&2; exit 1; }
+            grep -q "<base href=\"/$demo/\"" "incoming/$demo/index.html" || { echo "$demo has the wrong base href" >&2; exit 1; }
+          done
+          test -f incoming/404.html || { echo "404.html is missing" >&2; exit 1; }
+          if grep -rEl 'service_role|sb_secret_[A-Za-z0-9_-]{16,}' incoming > /dev/null; then
+            echo "The artifact contains a privileged key" >&2
+            exit 1
+          fi
+
+      - name: Install the demos
+        run: |
+          set -euo pipefail
+          rm -rf demo-material demo-tailwind 404.html metadata.json
+          cp -R incoming/demo-material incoming/demo-tailwind incoming/404.html incoming/metadata.json .
+          rm -rf incoming
+          sed -i 's/<nav id="demos" hidden>/<nav id="demos">/' index.html
+
+      - name: Open a pull request
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_ID: ${{ inputs.run-id }}
+        run: |
+          set -euo pipefail
+          short="${ARTIFACT_NAME#demos-}"
+          short="${short:0:7}"
+          branch="deploy/demos-$short"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git switch -c "$branch"
+          git add -A
+          git diff --cached --quiet && { echo "Nothing to deploy: the site already has these demos"; exit 0; }
+          git commit -m "chore(demos): deploy demos built from $SOURCE_REPOSITORY@$short" -m "Source run: https://github.com/$SOURCE_REPOSITORY/actions/runs/$RUN_ID"
+          git push origin "$branch"
+          gh pr create --base main --head "$branch" \
+            --title "chore(demos): deploy demos built from $SOURCE_REPOSITORY@$short" \
+            --body "Source run: https://github.com/$SOURCE_REPOSITORY/actions/runs/$RUN_ID
+          Source commit: $SOURCE_REPOSITORY@${ARTIFACT_NAME#demos-}
+
+          Merging deploys the demos to $ORIGIN. To roll back, revert this pull request."
