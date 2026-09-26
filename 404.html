@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Page not found - Pidrang</title>
+    <script>
+      (function (location) {
+        var demos = ['demo-material', 'demo-tailwind'];
+        var segments = location.pathname.split('/');
+        var demo = segments[1];
+        if (demos.indexOf(demo) === -1) {
+          return;
+        }
+        var rest = segments.slice(2).join('/').replace(/&/g, '~and~');
+        var query = location.search
+          ? '&' + location.search.slice(1).replace(/&/g, '~and~')
+          : '';
+        location.replace(
+          location.origin + '/' + demo + '/?/' + rest + query + location.hash,
+        );
+      })(window.location);
+    </script>
+  </head>
+  <body>
+    <h1>Page not found</h1>
+    <p><a href="/">Back to the Pidrang home page</a></p>
+  </body>
+</html>
