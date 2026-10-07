@@ -17,3 +17,6 @@ To deploy new demos:
 3. Merge the pull request to deploy. To roll back, revert it.
 
 Repository settings the workflow needs: Actions may create pull requests, and, while `pidrang/pidrang` is private, a `MONOREPO_READ_TOKEN` secret holding a fine-grained token that can read the Actions of that repository.
+
+
+<!-- Security scan triggered at 2026-10-07 11:56:31 -->
