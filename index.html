@@ -4,23 +4,122 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Pidrang — Build Angular admin applications faster</title>
-  <meta name="description" content="Pidrang is an upcoming Angular framework for building admin applications, internal tools, and CRUD applications faster.">
+  <meta name="description" content="Open-source, headless framework for Angular admin panels and internal tools. Signal-first, with Supabase, Angular Material and Tailwind.">
+  <link rel="canonical" href="https://pidrang.dev/">
 
-  <meta property="og:title" content="Pidrang — Build Angular admin applications faster">
-  <meta property="og:description" content="Pidrang is an upcoming Angular framework for building admin applications, internal tools, and CRUD applications faster.">
   <meta property="og:type" content="website">
-  <meta property="og:image" content="assets/logo/logo-large.png">
+  <meta property="og:site_name" content="Pidrang">
+  <meta property="og:url" content="https://pidrang.dev/">
+  <meta property="og:title" content="Pidrang — Build Angular admin applications faster">
+  <meta property="og:description" content="Open-source, headless framework for Angular admin panels and internal tools. Signal-first, with Supabase, Angular Material and Tailwind.">
+  <meta property="og:image" content="https://pidrang.dev/assets/social/social-card.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Pidrang logo and the tagline Build Angular admin applications faster">
 
-  <link rel="icon" type="image/png" href="assets/logo/logo-square.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="https://pidrang.dev/assets/social/social-card.png">
+
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/logo/favicon-32.png">
+  <link rel="apple-touch-icon" href="assets/logo/apple-touch-icon-180.png">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <main class="hero">
-    <img class="logo" src="assets/logo/logo-square.png" alt="Pidrang logo" width="250" height="250">
+  <header class="hero">
+    <img class="logo" src="assets/logo/mark-light-500.png" alt="Pidrang logo" width="484" height="500">
     <p class="wordmark">Pidrang</p>
-    <h1 class="headline">Something great is coming.</h1>
-    <a class="github-link" href="https://github.com/pidrang">View on GitHub</a>
-    <a class="contact-link" href="mailto:contact@pidrang.dev">contact@pidrang.dev</a>
+    <h1 class="headline">Build Angular admin applications faster.</h1>
+    <p class="lede">An open-source, headless framework for Angular admin panels, dashboards and internal tools. Describe a table once and get the list, the forms and the CRUD pages.</p>
+    <p class="status">Version 0.1.0 · MIT licensed · Angular 22.1+ (22.x) · pre-1.0</p>
+    <div class="actions">
+      <a class="button button-primary" href="https://github.com/pidrang/pidrang/blob/main/docs/getting-started.md">Get started</a>
+      <a class="button" href="https://github.com/pidrang/pidrang">View on GitHub</a>
+    </div>
+    <nav id="demos" hidden>
+      <span>Live demos</span>
+      <a class="text-link" href="/demo-material/">Angular Material</a>
+      <a class="text-link" href="/demo-tailwind/">Tailwind</a>
+    </nav>
+  </header>
+
+  <main>
+    <section aria-labelledby="features-title">
+      <h2 id="features-title">Less boilerplate for every table</h2>
+      <ul class="features">
+        <li><strong>Describe a table once.</strong> A typed <code>Resource</code> lists its fields; <code>ResourceTable</code> and <code>ResourceForm</code> render the table and the form from it.</li>
+        <li><strong>Angular-native.</strong> Signals, <code>resource()</code>, Signal Forms and standalone APIs. List state is signals: <code>value()</code>, <code>isLoading()</code>, <code>error()</code>, <code>reload()</code>.</li>
+        <li><strong>Headless core.</strong> <code>@pidrang/core</code> depends on <code>@angular/core</code> only. Angular Material and Tailwind layers share one component API.</li>
+        <li><strong>Supabase in a few commands.</strong> <code>npx pidrang init</code> reads your Supabase schema and writes the resources and the CRUD pages, without overwriting a file. Authorization stays in your Row Level Security policies.</li>
+      </ul>
+    </section>
+
+    <section aria-labelledby="code-title">
+      <h2 id="code-title">One definition per table</h2>
+      <pre class="code"><code>import { Resource } from '@pidrang/core';
+
+export const resources: Resource[] = [
+  {
+    name: 'products',
+    fields: [
+      { name: 'id', type: 'text', readOnly: true },
+      { name: 'name', type: 'text' },
+      { name: 'price', type: 'number' },
+      { name: 'in_stock', label: 'In stock', type: 'boolean' },
+      {
+        name: 'created_at',
+        label: 'Created at',
+        type: 'timestamp',
+        readOnly: true,
+        hasDefault: true,
+      },
+    ],
+  },
+];</code></pre>
+      <p>The table and the create and edit forms are rendered from these fields. <code>pidrang init</code> can generate it from your schema.</p>
+      <p><a class="text-link" href="https://github.com/pidrang/pidrang/blob/main/docs/getting-started.md">Read the full quickstart</a></p>
+    </section>
+
+    <section aria-labelledby="start-title">
+      <h2 id="start-title">Get started</h2>
+      <pre class="code commands"><code>npm install @pidrang/core @pidrang/supabase @pidrang/material @supabase/supabase-js
+ng add @angular/material
+npx pidrang init</code></pre>
+      <p>Run in an Angular 22.1+ standalone app. <code>pidrang init</code> connects to your Supabase project, generates the resources and pages, and prints the routes and providers to paste. Every table needs an <code>id</code> primary key.</p>
+      <p class="links">
+        <a class="text-link" href="https://github.com/pidrang/pidrang/blob/main/docs/getting-started.md">Read the quickstart</a>
+        <a class="text-link" href="https://www.npmjs.com/org/pidrang">npm packages</a>
+      </p>
+    </section>
+
+    <section aria-labelledby="packages-title">
+      <h2 id="packages-title">Packages</h2>
+      <dl class="packages">
+        <dt><code>@pidrang/core</code></dt>
+        <dd>Contracts, <code>providePidrang</code> and signal-based state. Depends on <code>@angular/core</code> only.</dd>
+        <dt><code>@pidrang/supabase</code></dt>
+        <dd><code>DataProvider</code> and <code>AuthProvider</code> backed by Supabase.</dd>
+        <dt><code>@pidrang/material</code></dt>
+        <dd><code>ResourceTable</code> and <code>ResourceForm</code> on Angular Material and Signal Forms.</dd>
+        <dt><code>@pidrang/tailwind</code></dt>
+        <dd>The same components styled with Tailwind utility classes.</dd>
+        <dt><code>pidrang</code></dt>
+        <dd>The CLI: <code>npx pidrang init</code> scaffolds resources and CRUD pages from a Supabase schema.</dd>
+      </dl>
+    </section>
+
+    <section aria-labelledby="oss-title">
+      <h2 id="oss-title">Open source</h2>
+      <p>Pidrang is MIT licensed and pre-1.0: the public API may change between minor versions. It is inspired by the resource and data-provider architecture of Refine, and is not affiliated with Angular or Refine.</p>
+      <p>Planned, not available yet: REST and GraphQL data providers, a PrimeNG UI layer, Tailwind pages from the CLI. See the <a class="text-link" href="https://github.com/pidrang/pidrang/blob/main/ROADMAP.md">roadmap</a>.</p>
+      <p><a class="text-link" href="https://github.com/pidrang/pidrang/blob/main/CONTRIBUTING.md">Contributions welcome</a></p>
+    </section>
   </main>
+
+  <footer class="footer">
+    <a href="mailto:contact@pidrang.dev">contact@pidrang.dev</a>
+    <a href="https://github.com/pidrang/pidrang">GitHub</a>
+    <a href="https://www.npmjs.com/org/pidrang">npm</a>
+    <a href="https://github.com/pidrang/pidrang/blob/main/LICENSE">MIT License</a>
+  </footer>
 </body>
 </html>
