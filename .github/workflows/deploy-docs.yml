@@ -99,8 +99,9 @@ jobs:
           git add -A
           git diff --cached --quiet && { echo "Nothing to deploy: the site already has these docs"; exit 0; }
           git commit -m "chore(docs): deploy docs built from $SOURCE_REPOSITORY@$short" -m "Source run: https://github.com/$SOURCE_REPOSITORY/actions/runs/$RUN_ID"
-          # A retried run recreates the same branch; overwrite it unless someone pushed to it since
-          git push --force-with-lease origin "$branch"
+          # A retried run recreates the same branch; fetch its current tip first so the lease is not stale
+          git fetch origin "refs/heads/$branch:refs/remotes/origin/$branch" || true
+          git push --force-with-lease="refs/heads/$branch:$(git rev-parse "refs/remotes/origin/$branch" 2>/dev/null || echo '')" origin "$branch"
           gh pr create --base main --head "$branch" \
             --title "chore(docs): deploy docs built from $SOURCE_REPOSITORY@$short" \
             --body "Source run: https://github.com/$SOURCE_REPOSITORY/actions/runs/$RUN_ID
