@@ -6,4 +6,22 @@
   <url>
     <loc>https://pidrang.dev/demos/</loc>
   </url>
+  <url>
+    <loc>https://pidrang.dev/docs/</loc>
+  </url>
+  <url>
+    <loc>https://pidrang.dev/docs/getting-started</loc>
+  </url>
+  <url>
+    <loc>https://pidrang.dev/docs/architecture</loc>
+  </url>
+  <url>
+    <loc>https://pidrang.dev/docs/data-providers</loc>
+  </url>
+  <url>
+    <loc>https://pidrang.dev/docs/design-notes</loc>
+  </url>
+  <url>
+    <loc>https://pidrang.dev/docs/releasing</loc>
+  </url>
 </urlset>

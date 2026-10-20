@@ -18,5 +18,17 @@ To deploy new demos:
 
 Repository settings the workflow needs: Actions may create pull requests, and, while `pidrang/pidrang` is private, a `MONOREPO_READ_TOKEN` secret holding a fine-grained token that can read the Actions of that repository.
 
+## Docs
+
+The documentation at `/docs/` is built in [pidrang/pidrang](https://github.com/pidrang/pidrang) by its `Docs artifacts` workflow (VitePress, sources in its `docs/` folder) and served from this repository under `/docs/`. Its files, including `metadata.json`, are generated: do not edit them by hand.
+
+To deploy new docs:
+
+1. In `pidrang/pidrang`, run the `Docs artifacts` workflow manually on the commit to deploy and note its run id.
+2. Here, run the `Deploy docs` workflow with that run id. It checks the run, the artifact and its `metadata.json`, then opens a pull request with the files.
+3. Merge the pull request to deploy. To roll back, revert it.
+
+The docs pipeline is separate from the demos: it never touches `demo-material/`, `demo-tailwind/`, `demos/` or the root `404.html`, and a docs fix does not rebuild the Angular applications.
+
 
 <!-- Security scan triggered at 2026-10-07 11:56:31 -->
