@@ -1,0 +1,108 @@
+name: Deploy docs
+
+on:
+  workflow_dispatch:
+    inputs:
+      run-id:
+        description: Run id of a manual "Docs artifacts" run in pidrang/pidrang.
+        required: true
+        type: string
+
+permissions:
+  contents: write
+  pull-requests: write
+
+env:
+  SOURCE_REPOSITORY: pidrang/pidrang
+  SOURCE_WORKFLOW_PATH: .github/workflows/docs-artifacts.yml
+  ORIGIN: https://pidrang.dev
+
+jobs:
+  prepare:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Check the source run
+        env:
+          GH_TOKEN: ${{ secrets.MONOREPO_READ_TOKEN || github.token }}
+          RUN_ID: ${{ inputs.run-id }}
+        run: |
+          set -euo pipefail
+          case "$RUN_ID" in
+            ''|*[!0-9]*) echo "run-id must be a number" >&2; exit 1 ;;
+          esac
+          run=$(gh api "repos/$SOURCE_REPOSITORY/actions/runs/$RUN_ID")
+          echo "$run" | jq -e --arg path "$SOURCE_WORKFLOW_PATH" --arg repo "$SOURCE_REPOSITORY" '
+            .event == "workflow_dispatch"
+            and .conclusion == "success"
+            and (.path | startswith($path))
+            and .head_repository.full_name == $repo
+          ' > /dev/null || { echo "The run is not a successful manual Docs artifacts run of $SOURCE_REPOSITORY" >&2; exit 1; }
+          name=$(gh api "repos/$SOURCE_REPOSITORY/actions/runs/$RUN_ID/artifacts" --jq '[.artifacts[] | select((.name | startswith("docs-")) and (.expired | not))] | if length == 1 then .[0].name else empty end')
+          test -n "$name" || { echo "Expected exactly one unexpired docs-* artifact" >&2; exit 1; }
+          echo "ARTIFACT_NAME=$name" >> "$GITHUB_ENV"
+
+      - name: Download the artifact
+        env:
+          GH_TOKEN: ${{ secrets.MONOREPO_READ_TOKEN || github.token }}
+          RUN_ID: ${{ inputs.run-id }}
+        run: |
+          set -euo pipefail
+          gh run download "$RUN_ID" --repo "$SOURCE_REPOSITORY" --name "$ARTIFACT_NAME" --dir incoming
+
+      - name: Verify the artifact
+        run: |
+          set -euo pipefail
+          sha="${ARTIFACT_NAME#docs-}"
+          jq -e --arg sha "$sha" --arg origin "$ORIGIN" --arg repo "$SOURCE_REPOSITORY" '
+            .schema == 1
+            and .source.repository == $repo
+            and .source.commit == $sha
+            and .source.dirty == false
+            and .origin == $origin
+            and .docs.path == "/docs/"
+            and .docs.url == ($origin + "/docs/")
+            and (.docs.pages | length == 5)
+          ' incoming/metadata.json > /dev/null || { echo "metadata.json does not match the run" >&2; exit 1; }
+          test -f incoming/index.html || { echo "index.html is missing" >&2; exit 1; }
+          grep -q 'href="/docs/assets/' incoming/index.html || { echo "index.html does not reference /docs/assets/" >&2; exit 1; }
+          for page in getting-started architecture data-providers design-notes releasing; do
+            test -f "incoming/$page.html" || { echo "$page.html is missing" >&2; exit 1; }
+            grep -q "href=\"/docs/\"\|href=\"/docs/$page\"" "incoming/$page.html" || { echo "$page.html has the wrong base" >&2; exit 1; }
+          done
+          # No service_role pattern here: docs/data-providers.md names the role as prose
+          if grep -rEl 'sb_secret_[A-Za-z0-9_-]{16,}' incoming > /dev/null; then
+            echo "The artifact contains a privileged key" >&2
+            exit 1
+          fi
+
+      - name: Install the docs
+        run: |
+          set -euo pipefail
+          rm -rf docs
+          cp -R incoming docs
+          rm -rf incoming
+
+      - name: Open a pull request
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_ID: ${{ inputs.run-id }}
+        run: |
+          set -euo pipefail
+          short="${ARTIFACT_NAME#docs-}"
+          short="${short:0:7}"
+          branch="deploy/docs-$short"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git switch -c "$branch"
+          git add -A
+          git diff --cached --quiet && { echo "Nothing to deploy: the site already has these docs"; exit 0; }
+          git commit -m "chore(docs): deploy docs built from $SOURCE_REPOSITORY@$short" -m "Source run: https://github.com/$SOURCE_REPOSITORY/actions/runs/$RUN_ID"
+          git push origin "$branch"
+          gh pr create --base main --head "$branch" \
+            --title "chore(docs): deploy docs built from $SOURCE_REPOSITORY@$short" \
+            --body "Source run: https://github.com/$SOURCE_REPOSITORY/actions/runs/$RUN_ID
+          Source commit: $SOURCE_REPOSITORY@${ARTIFACT_NAME#docs-}
+
+          Merging deploys the docs to $ORIGIN/docs/. To roll back, revert this pull request."
