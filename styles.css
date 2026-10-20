@@ -161,11 +161,9 @@ body:has(#demos:not([hidden])) .nav-demo {
 #demos:not([hidden]) {
   display: flex;
   flex-wrap: wrap;
-  justify-content: center;
+  align-items: center;
   gap: 0.75rem 1.5rem;
   margin-top: 1.5rem;
-  color: var(--muted);
-  font-size: 0.9rem;
 }
 
 section {
@@ -188,9 +186,7 @@ code {
   font-size: 0.9em;
 }
 
-p code,
-li code,
-dd code {
+:not(pre) > code {
   padding: 0.1em 0.35em;
   background: var(--navy);
   border-radius: 0.25rem;
@@ -211,33 +207,54 @@ dd code {
   overflow-wrap: anywhere;
 }
 
-.features {
+.preview {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 1px solid var(--navy);
+  border-radius: 0.4rem;
+}
+
+.steps {
   margin: 0;
   padding: 0;
   list-style: none;
+  counter-reset: step;
 }
 
-.features li + li {
-  margin-top: 1rem;
+.steps li {
+  position: relative;
+  padding-left: 2.75rem;
+  counter-increment: step;
 }
 
-.links {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.75rem 1.5rem;
+.steps li + li {
+  margin-top: 2rem;
 }
 
-.packages {
-  margin: 0;
-}
-
-.packages dt {
+.steps li::before {
+  content: counter(step);
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 1.9rem;
+  height: 1.9rem;
+  border-radius: 50%;
+  background: var(--orange);
+  color: var(--bg);
   font-weight: 700;
+  line-height: 1.9rem;
+  text-align: center;
 }
 
-.packages dd {
-  margin: 0.25rem 0 1rem;
-  color: var(--muted);
+.steps h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  line-height: 1.9rem;
+}
+
+.steps p {
+  margin: 0.25rem 0 0.75rem;
 }
 
 .text-link {
@@ -268,6 +285,14 @@ dd code {
 
 .footer a:hover {
   color: var(--orange);
+}
+
+.footer-note {
+  width: 100%;
+  margin: 0;
+  text-align: center;
+  color: var(--muted);
+  font-size: 0.85rem;
 }
 
 a:focus-visible {
