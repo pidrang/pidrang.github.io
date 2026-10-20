@@ -1,0 +1,24 @@
+{
+  "schema": 1,
+  "source": {
+    "repository": "pidrang/pidrang",
+    "commit": "8c666a2084de4cc5a7c841e052669abb835adf9e",
+    "ref": "main",
+    "dirty": false,
+    "workflow": "Docs artifacts",
+    "runId": "39478137872"
+  },
+  "builtAt": "2026-10-20T18:50:11.371Z",
+  "origin": "https://pidrang.dev",
+  "docs": {
+    "path": "/docs/",
+    "url": "https://pidrang.dev/docs/",
+    "pages": [
+      "getting-started",
+      "architecture",
+      "data-providers",
+      "design-notes",
+      "releasing"
+    ]
+  }
+}
