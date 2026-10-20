@@ -48,82 +48,38 @@
         <a class="button button-primary" href="https://github.com/pidrang/pidrang/blob/main/docs/getting-started.md">Get started</a>
         <a class="button" href="https://github.com/pidrang/pidrang">View on GitHub</a>
       </div>
-      <nav id="demos">
-        <span>Live demos</span>
-        <a class="text-link" href="/demo-material/">Angular Material</a>
-        <a class="text-link" href="/demo-tailwind/">Tailwind</a>
-      </nav>
     </div>
 
-    <section aria-labelledby="features-title">
-      <h2 id="features-title">Less boilerplate for every table</h2>
-      <ul class="features">
-        <li><strong>Describe a table once.</strong> A typed <code>Resource</code> lists its fields; <code>ResourceTable</code> and <code>ResourceForm</code> render the table and the form from it.</li>
-        <li><strong>Angular-native.</strong> Signals, <code>resource()</code>, Signal Forms and standalone APIs. List state is signals: <code>value()</code>, <code>isLoading()</code>, <code>error()</code>, <code>reload()</code>.</li>
-        <li><strong>Headless core.</strong> <code>@pidrang/core</code> depends on <code>@angular/core</code> only. Angular Material and Tailwind layers share one component API.</li>
-        <li><strong>Supabase in a few commands.</strong> <code>npx pidrang init</code> reads your Supabase schema and writes the resources and the CRUD pages, without overwriting a file. Authorization stays in your Row Level Security policies.</li>
-      </ul>
-    </section>
-
-    <section aria-labelledby="code-title">
-      <h2 id="code-title">One definition per table</h2>
-      <pre class="code"><code>import { Resource } from '@pidrang/core';
-
-export const resources: Resource[] = [
-  {
-    name: 'products',
-    fields: [
-      { name: 'id', type: 'text', readOnly: true },
-      { name: 'name', type: 'text' },
-      { name: 'price', type: 'number' },
-      { name: 'in_stock', label: 'In stock', type: 'boolean' },
-      {
-        name: 'created_at',
-        label: 'Created at',
-        type: 'timestamp',
-        readOnly: true,
-        hasDefault: true,
-      },
-    ],
-  },
-];</code></pre>
-      <p>The table and the create and edit forms are rendered from these fields. <code>pidrang init</code> can generate it from your schema.</p>
-      <p><a class="text-link" href="https://github.com/pidrang/pidrang/blob/main/docs/getting-started.md">Read the full quickstart</a></p>
+    <section aria-labelledby="preview-title">
+      <h2 id="preview-title">See it working</h2>
+      <img class="preview" src="assets/screenshots/demo-material-products.png" alt="Pidrang list page for a products table, rendered with Angular Material: one column per field, with Show, Edit and Delete actions" width="1100" height="340">
+      <p>A <code>products</code> table from Supabase, rendered by <code>ResourceTable</code> of <code>@pidrang/material</code>. The same demo exists with the Tailwind layer.</p>
+      <nav id="demos">
+        <a class="button button-primary" href="/demo-material/">Try the live demo</a>
+        <a class="text-link" href="/demo-tailwind/">Tailwind version</a>
+      </nav>
     </section>
 
     <section aria-labelledby="start-title">
       <h2 id="start-title">Get started</h2>
-      <pre class="code commands"><code>npm install @pidrang/core @pidrang/supabase @pidrang/material @supabase/supabase-js
-ng add @angular/material
-npx pidrang init</code></pre>
-      <p>Run in an Angular 22.1+ standalone app. <code>pidrang init</code> connects to your Supabase project, generates the resources and pages, and prints the routes and providers to paste. Every table needs an <code>id</code> primary key.</p>
-      <p class="links">
-        <a class="text-link" href="https://github.com/pidrang/pidrang/blob/main/docs/getting-started.md">Read the quickstart</a>
-        <a class="text-link" href="https://www.npmjs.com/org/pidrang">npm packages</a>
-      </p>
-    </section>
-
-    <section aria-labelledby="packages-title">
-      <h2 id="packages-title">Packages</h2>
-      <dl class="packages">
-        <dt><code>@pidrang/core</code></dt>
-        <dd>Contracts, <code>providePidrang</code> and signal-based state. Depends on <code>@angular/core</code> only.</dd>
-        <dt><code>@pidrang/supabase</code></dt>
-        <dd><code>DataProvider</code> and <code>AuthProvider</code> backed by Supabase.</dd>
-        <dt><code>@pidrang/material</code></dt>
-        <dd><code>ResourceTable</code> and <code>ResourceForm</code> on Angular Material and Signal Forms.</dd>
-        <dt><code>@pidrang/tailwind</code></dt>
-        <dd>The same components styled with Tailwind utility classes.</dd>
-        <dt><code>pidrang</code></dt>
-        <dd>The CLI: <code>npx pidrang init</code> scaffolds resources and CRUD pages from a Supabase schema.</dd>
-      </dl>
-    </section>
-
-    <section aria-labelledby="oss-title">
-      <h2 id="oss-title">Open source</h2>
-      <p>Pidrang is MIT licensed and pre-1.0: the public API may change between minor versions. It is inspired by the resource and data-provider architecture of Refine, and is not affiliated with Angular or Refine.</p>
-      <p>Planned, not available yet: REST and GraphQL data providers, a PrimeNG UI layer, Tailwind pages from the CLI. See the <a class="text-link" href="https://github.com/pidrang/pidrang/blob/main/ROADMAP.md">roadmap</a>.</p>
-      <p><a class="text-link" href="https://github.com/pidrang/pidrang/blob/main/CONTRIBUTING.md">Contributions welcome</a></p>
+      <ol class="steps">
+        <li>
+          <h3>Install</h3>
+          <p>In an Angular 22.1+ standalone app:</p>
+          <pre class="code commands"><code>npm install @pidrang/core @pidrang/supabase @pidrang/material @supabase/supabase-js
+ng add @angular/material</code></pre>
+        </li>
+        <li>
+          <h3>Generate</h3>
+          <p>From the root of the app, connect to your Supabase project and pick your tables. The CLI writes <code>resources.ts</code> and the List, Create, Show and Edit pages, without overwriting a file.</p>
+          <pre class="code commands"><code>npx pidrang init</code></pre>
+        </li>
+        <li>
+          <h3>Wire</h3>
+          <p>Paste what the CLI prints: <code>...resourceRoutes</code> in your routes, <code>provideRouter(routes, withComponentInputBinding())</code> and <code>providePidrang</code> in your app config. Then run <code>ng serve</code>.</p>
+        </li>
+      </ol>
+      <p>Every table needs an <code>id</code> primary key. <a class="text-link" href="https://github.com/pidrang/pidrang/blob/main/docs/getting-started.md">Read the full guide</a></p>
     </section>
   </main>
 
@@ -132,6 +88,7 @@ npx pidrang init</code></pre>
     <a href="https://github.com/pidrang/pidrang">GitHub</a>
     <a href="https://www.npmjs.com/org/pidrang">npm</a>
     <a href="https://github.com/pidrang/pidrang/blob/main/LICENSE">MIT License</a>
+    <p class="footer-note">Inspired by Refine. Not affiliated with Angular or Refine.</p>
   </footer>
 </body>
 </html>
