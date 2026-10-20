@@ -1,0 +1,31 @@
+{
+  "schema": 1,
+  "source": {
+    "repository": "pidrang/pidrang",
+    "commit": "bb5b9b91400d0d2b9238640b452b97ecf6281b93",
+    "ref": "main",
+    "dirty": false,
+    "workflow": "Demo artifacts",
+    "runId": "39433377505"
+  },
+  "builtAt": "2026-10-20T13:47:48.698Z",
+  "origin": "https://pidrang.dev",
+  "demos": [
+    {
+      "name": "demo-material",
+      "path": "/demo-material/",
+      "url": "https://pidrang.dev/demo-material/"
+    },
+    {
+      "name": "demo-tailwind",
+      "path": "/demo-tailwind/",
+      "url": "https://pidrang.dev/demo-tailwind/"
+    }
+  ],
+  "packages": {
+    "@pidrang/core": "0.1.0",
+    "@pidrang/supabase": "0.1.0",
+    "@pidrang/material": "0.1.0",
+    "@pidrang/tailwind": "0.1.0"
+  }
+}
