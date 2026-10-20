@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Live demos — Pidrang</title>
+  <meta name="description" content="The Pidrang demo, built with Angular Material and with Tailwind: lists, forms and CRUD pages over a public Supabase project.">
+  <link rel="canonical" href="https://pidrang.dev/demos/">
+
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Pidrang">
+  <meta property="og:url" content="https://pidrang.dev/demos/">
+  <meta property="og:title" content="Live demos — Pidrang">
+  <meta property="og:description" content="The Pidrang demo, built with Angular Material and with Tailwind: lists, forms and CRUD pages over a public Supabase project.">
+  <meta property="og:image" content="https://pidrang.dev/assets/social/social-card.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Pidrang logo and the tagline Build Angular admin applications faster">
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="https://pidrang.dev/assets/social/social-card.png">
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/logo/favicon-32.png">
+  <link rel="apple-touch-icon" href="/assets/logo/apple-touch-icon-180.png">
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="/">
+      <img src="/assets/logo/mark-light-500.png" alt="" width="484" height="500">
+      <span>Pidrang</span>
+    </a>
+    <nav class="site-nav" aria-label="Main">
+      <a href="https://github.com/pidrang/pidrang/blob/main/docs/getting-started.md">Docs</a>
+      <a href="https://github.com/pidrang/pidrang/blob/main/ROADMAP.md">Roadmap</a>
+      <a href="/demos/" aria-current="page">Demo</a>
+    </nav>
+    <a class="button button-small" href="https://github.com/pidrang/pidrang">GitHub</a>
+  </header>
+
+  <main>
+    <div class="page-head">
+      <h1 class="page-title">Live demos</h1>
+      <p class="lede">The same admin application, built twice: once with Angular Material and once with Tailwind. Both read from a public Supabase project, so you can click through the lists, the forms and the CRUD pages.</p>
+    </div>
+
+    <section aria-labelledby="pick-title">
+      <h2 id="pick-title">Pick a UI layer</h2>
+
+      <ul class="demo-options">
+        <li class="demo-option">
+          <h3>Angular Material</h3>
+          <p><code>@pidrang/material</code> renders <code>ResourceTable</code> and <code>ResourceForm</code> on Angular Material and Signal Forms.</p>
+          <a class="button button-primary" href="/demo-material/" target="_blank" rel="noopener">Open the Material demo<span class="external-mark" aria-hidden="true">↗</span><span class="sr-only"> (opens in a new tab)</span></a>
+        </li>
+        <li class="demo-option">
+          <h3>Tailwind</h3>
+          <p><code>@pidrang/tailwind</code> exposes the same components, styled with Tailwind utility classes.</p>
+          <a class="button button-primary" href="/demo-tailwind/" target="_blank" rel="noopener">Open the Tailwind demo<span class="external-mark" aria-hidden="true">↗</span><span class="sr-only"> (opens in a new tab)</span></a>
+        </li>
+      </ul>
+
+      <p>Both layers share one component API: switching is a change of import and of element name.</p>
+    </section>
+
+    <section aria-labelledby="inside-title">
+      <h2 id="inside-title">What is in the demo</h2>
+      <ul class="demo-facts">
+        <li>Three resources: <code>users</code>, <code>products</code> and <code>orders</code>. Each has a list, a show page, a create form, an edit form and delete.</li>
+        <li>Reads are open to everyone. Create, edit and delete ask you to sign in first.</li>
+        <li>The data is reset every hour, so break it as much as you like.</li>
+        <!-- Add the test account here once environment.demoAccount is set in pidrang/pidrang. -->
+      </ul>
+    </section>
+
+    <section aria-labelledby="build-title">
+      <h2 id="build-title">Build the same in your app</h2>
+      <p>The demos use the published packages and the same three steps as the guide: install, generate the resources with <code>npx pidrang init</code>, then wire the routes and the providers.</p>
+      <p><a class="text-link" href="https://github.com/pidrang/pidrang/blob/main/docs/getting-started.md">Read the getting started guide</a></p>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <a href="mailto:contact@pidrang.dev">contact@pidrang.dev</a>
+    <a href="https://github.com/pidrang/pidrang">GitHub</a>
+    <a href="https://www.npmjs.com/org/pidrang">npm</a>
+    <a href="https://github.com/pidrang/pidrang/blob/main/LICENSE">MIT License</a>
+    <p class="footer-note">Inspired by Refine. Not affiliated with Angular or Refine.</p>
+  </footer>
+</body>
+</html>
