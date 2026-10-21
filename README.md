@@ -1,6 +1,6 @@
 # Pidrang
 
-Landing page for **Pidrang**, an open-source headless framework for building Angular admin applications faster.
+Landing page for **Pidrang**: generate an Angular admin from your Supabase schema. Build Angular admin applications faster.
 
 Hosted via GitHub Pages at [pidrang.dev](https://pidrang.dev).
 
