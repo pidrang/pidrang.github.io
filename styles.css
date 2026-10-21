@@ -343,6 +343,56 @@ code {
   color: var(--orange);
 }
 
+.newsletter {
+  width: 100%;
+  margin-bottom: 1.25rem;
+  text-align: center;
+}
+
+.newsletter label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+.newsletter-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.newsletter input {
+  flex: 1 1 14rem;
+  max-width: 20rem;
+  min-width: 0;
+  padding: 0.6rem 0.75rem;
+  border: 1px solid var(--navy);
+  border-radius: 0.4rem;
+  background: var(--bg);
+  color: var(--text);
+  font: inherit;
+}
+
+.newsletter button {
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.newsletter-note {
+  margin: 0.5rem 0 0;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.newsletter input:focus-visible,
+.newsletter button:focus-visible {
+  outline: 2px solid var(--orange);
+  outline-offset: 2px;
+}
+
 .footer-note {
   width: 100%;
   margin: 0;
