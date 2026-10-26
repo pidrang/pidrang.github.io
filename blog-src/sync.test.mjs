@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
-import { existsSync } from "node:fs";
-import { mkdir, mkdtemp, readdir, rm, writeFile } from "node:fs/promises";
+import { execFileSync } from "node:child_process";
+import { statSync } from "node:fs";
+import { cp, mkdir, mkdtemp, readdir, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { after, test } from "node:test";
@@ -114,11 +115,24 @@ test("description length and single line", () => {
 test("cover path and traversal", async () => {
   const withCover = (cover, alt = "A cover") => block(["slug: a-post", `description: ${DESCRIPTION}`, `cover: ${cover}`, `cover_alt: ${alt}`]);
 
-  for (const cover of ["assets/blog/x.png", "/assets/x.png", "/assets/blog/../logo/x.png", "/assets/blog/a/b.png", "/assets/blog/", "/assets/blog/x.png?raw=1"]) {
+  for (const cover of ["assets/blog/x.png", "/assets/x.png", "/assets/blog/a/b.png", "/assets/blog/../logo/x.png", "/assets/blog/", "/assets/blog/x.png?raw=1"]) {
     const result = validateDiscussion(discussion({ body: withCover(cover) }), SITE_ROOT);
     assert.ok(result.errors.some((message) => message.startsWith("cover must match")), cover);
   }
+  for (const cover of ["/assets/blog/..", "/assets/blog/."]) {
+    const result = validateDiscussion(discussion({ body: withCover(cover) }), SITE_ROOT);
+    assert.equal(result.errors.length, 1, cover);
+    assert.match(result.errors[0], /must not contain "\." or "\.\." segments/, cover);
+  }
   assert.match(messages(discussion({ body: withCover("/assets/blog/missing.png") })), /cover file not found/);
+});
+
+test("cover must be a regular file", async () => {
+  const siteRoot = await tempDir();
+  await mkdir(join(siteRoot, "assets", "blog", "folder"), { recursive: true });
+  const withCover = (cover) => block(["slug: a-post", `description: ${DESCRIPTION}`, `cover: ${cover}`, "cover_alt: A cover"]);
+  const errors = validateDiscussion(discussion({ body: withCover("/assets/blog/folder") }), siteRoot).errors;
+  assert.deepEqual(errors, ["cover is not a file in the site repository: /assets/blog/folder"]);
 });
 
 test("cover file is looked up under the site root", async () => {
@@ -191,6 +205,16 @@ test("CRLF line endings and leading blank lines are accepted", () => {
   assert.equal(parsed.meta.slug, "a-post");
   assert.equal(parsed.content, "Body.\r\n");
   assert.ok(isValid(discussion({ body })));
+});
+
+test("spaces and blank lines before the metadata block are accepted", () => {
+  const body = `\n  \n<!--\nslug: a-post\ndescription: ${DESCRIPTION}\n-->\n\n  The body.\n`;
+  const parsed = parseMetadataBlock(body);
+  assert.deepEqual(parsed.errors, []);
+  assert.equal(parsed.content, "The body.\n");
+  assert.ok(isValid(discussion({ body })));
+  assert.ok(parseMetadataBlock(`  <!--\nslug: a-post\n-->`).meta);
+  assert.match(parseMetadataBlock(`text\n<!--\nslug: a-post\n-->`).error, /does not start with a metadata block/);
 });
 
 test("every error is collected with number and URL", () => {
@@ -268,16 +292,19 @@ test("fixtures hold two valid posts", async () => {
 });
 
 test("an invalid post writes nothing and names the discussion", async () => {
-  const work = await tempDir();
-  const fixtures = join(work, "fixtures.json");
+  const site = await tempDir();
+  await mkdir(join(site, "blog", "kept"), { recursive: true });
+  await writeFile(join(site, "blog", "kept", "index.html"), "kept");
+  const fixtures = join(site, "fixtures.json");
   await writeFile(fixtures, JSON.stringify([normalizeDiscussion(discussion({ number: 99, slug: "Bad Slug" }))]));
-  const blogDir = join(SITE_ROOT, "blog");
-  const before = existsSync(blogDir) ? (await readdir(blogDir)).join(",") : "absent";
-  await assert.rejects(sync({ fixtures }), (error) => {
+  const before = await readdir(join(site, "blog"), { recursive: true });
+  const beforeText = await readFile(join(site, "blog", "kept", "index.html"), "utf8");
+  await assert.rejects(sync({ fixtures, siteRoot: site }), (error) => {
     assert.match(error.message, /^#99 https:\/\/github\.com\/pidrang\/pidrang\/discussions\/7: .*slug must match[\s\S]*nothing written$/);
     return true;
   });
-  assert.equal(existsSync(blogDir) ? (await readdir(blogDir)).join(",") : "absent", before);
+  assert.deepEqual(await readdir(join(site, "blog"), { recursive: true }), before);
+  assert.equal(await readFile(join(site, "blog", "kept", "index.html"), "utf8"), beforeText);
 });
 
 test("normalizeDiscussion reads the slug from the metadata block", () => {
@@ -351,4 +378,52 @@ test("fetchDiscussions fails on missing category, API errors and pagination", as
 test("missing environment fails clearly", async () => {
   await assert.rejects(sync({}, {}), /SOURCE_REPOSITORY is not set/);
   await assert.rejects(sync({}, { SOURCE_REPOSITORY: "pidrang/pidrang" }), /GITHUB_TOKEN is not set/);
+});
+
+test("the real Hugo build works and is reproducible", { skip: process.env.HUGO_BIN === undefined ? "HUGO_BIN is not set" : false }, async () => {
+  const site = await tempDir();
+  const first = await sync({ fixtures: FIXTURES, siteRoot: site });
+  assert.deepEqual(first.change, { added: ["signal-first-crud", "ui-agnostic-core"], changed: [], removed: [] });
+  for (const file of [
+    "blog/index.html",
+    "blog/index.xml",
+    "blog/sitemap.xml",
+    "blog/signal-first-crud/index.html",
+    "blog/ui-agnostic-core/index.html",
+    "blog/categories/tutorials/index.html",
+    "blog/categories/architecture/index.html",
+  ]) {
+    assert.ok((await statSync(join(site, file))).size > 0, file);
+  }
+
+  const post = await readFile(join(site, "blog", "signal-first-crud", "index.html"), "utf8");
+  assert.match(post, /<script type="application\/ld\+json">\{"@context":"https:\/\/schema.org","@type":"BlogPosting"/);
+  assert.match(post, /data-term="12"/);
+  assert.match(post, /data-repo="pidrang\/pidrang"/);
+  assert.match(post, /data-goatcounter="https:\/\/pidrang.goatcounter.com\/count"/);
+  assert.match(post, /href="https:\/\/github.com\/pidrang\/pidrang\/discussions\/12"/);
+  assert.match(post, /<time datetime="2026-10-20T09:30:00Z">2026-10-20<\/time>[\s\S]*in <a [^>]*>tutorials<\/a>[\s\S]*By <a href="https:\/\/github.com\/fetrarij">fetrarij<\/a>/);
+  assert.match(post, /<table>/);
+  assert.match(post, /&ldquo;resource&rdquo;/);
+  assert.doesNotMatch(post, /Published /);
+
+  const list = await readFile(join(site, "blog", "index.html"), "utf8");
+  assert.ok(list.indexOf("signal-first-crud") < list.indexOf("ui-agnostic-core"));
+  assert.doesNotMatch(list, /giscus/);
+  assert.match(await readFile(join(site, "blog", "categories", "tutorials", "index.html"), "utf8"), /<title>Tutorials — Pidrang blog<\/title>/);
+
+  for (const file of ["blog/index.xml", "blog/sitemap.xml", "blog/signal-first-crud/index.html"]) {
+    assert.doesNotMatch(await readFile(join(site, file), "utf8"), /generator|lastBuildDate|<generator/i, file);
+  }
+
+  const snapshot = await tempDir();
+  await cp(join(site, "blog"), join(snapshot, "blog"), { recursive: true });
+  const second = await sync({ fixtures: FIXTURES, siteRoot: site });
+  assert.deepEqual(second.change, { added: [], changed: [], removed: [] });
+  assert.equal(execFileSync("diff", ["-r", join(snapshot, "blog"), join(site, "blog")], { encoding: "utf8" }), "");
+  assert.match(first.report, /### Added \(2\)/);
+
+  const source = await readdir(SCRIPT_DIR);
+  assert.ok(!source.includes(".hugo_build.lock"), ".hugo_build.lock in blog-src/");
+  assert.ok(!source.includes("resources"), "resources/ in blog-src/");
 });

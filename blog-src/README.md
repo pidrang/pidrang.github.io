@@ -35,7 +35,7 @@ Every run of the sync rereads the whole Blog category. An invalid post makes the
 
 ## Build locally
 
-Use a fork with Discussions enabled and a Blog category to test; never create test discussions in `pidrang/pidrang`, since they are public at once.
+Use the fixtures for a local build. To test a real discussion, create it in a fork with Discussions enabled and a Blog category; a discussion created in `pidrang/pidrang` is visible as soon as it exists.
 
 1. Install Hugo 0.168.0 (standard edition) outside the repositories:
 
@@ -66,10 +66,10 @@ From the root of the site repository:
 
 ```sh
 node --test blog-src/sync.test.mjs
-HUGO_BIN=/tmp/hugo-0.168.0/hugo node --test blog-src/sync.test.mjs blog-src/sync.integration.test.mjs
+HUGO_BIN=/tmp/hugo-0.168.0/hugo node --test blog-src/sync.test.mjs
 ```
 
-The unit tests need no Hugo. The integration test runs the real Hugo build on the fixtures; it is skipped without `HUGO_BIN` and restores the existing `blog/` when it ends.
+The unit tests need no Hugo. The integration test runs the real Hugo build on the fixtures in a temporary directory; it is skipped without `HUGO_BIN` and never writes to the `blog/` of the repository.
 
 ## Layouts
 

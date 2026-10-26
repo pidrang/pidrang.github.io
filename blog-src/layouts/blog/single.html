@@ -3,11 +3,11 @@
       <div class="page-head">
         <h1 class="page-title">{{ .Title }}</h1>
         <p class="post-meta">
-          Published <time datetime="{{ .Date.Format "2006-01-02T15:04:05Z07:00" }}">{{ .Date.Format "2006-01-02" }}</time>
+          <time datetime="{{ .Date.Format "2006-01-02T15:04:05Z07:00" }}">{{ .Date.Format "2006-01-02" }}</time>
           {{- range .Params.categories }}
           in <a href="{{ printf "/blog/categories/%s/" . | relURL }}">{{ . }}</a>
           {{- end }}
-          by <a href="{{ .Params.author_url }}">{{ .Params.author }}</a>
+          By <a href="{{ .Params.author_url }}">{{ .Params.author }}</a>
         </p>
       </div>
 

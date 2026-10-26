@@ -39,7 +39,7 @@ Discussion events in `pidrang/pidrang` start the workflow through `blog-dispatch
 Repository settings the blog needs:
 
 - Actions may create pull requests.
-- `MONOREPO_READ_TOKEN` (optional): a fine-grained token with `Discussions: read` on `pidrang/pidrang`. Without it, the workflow uses `github.token`, which cannot read those discussions while `pidrang/pidrang` is private.
+- `MONOREPO_READ_TOKEN` (optional): a fine-grained token with `Discussions: read` on `pidrang/pidrang`. Without it, the workflow uses `github.token`; set the secret if that token cannot read the discussions.
 - In `pidrang/pidrang`, the secret `BLOG_DISPATCH_TOKEN`: a fine-grained token limited to this repository with `Actions: Read and write`, used by `blog-dispatch.yml` to start `sync-blog.yml`.
 - Optional variables: `BLOG_SOURCE_REPOSITORY` (default `pidrang/pidrang`, read by `sync-blog.yml`) and `BLOG_SITE_REPOSITORY` (default `pidrang/pidrang.github.io`, read by `blog-dispatch.yml` in `pidrang/pidrang`).
 
