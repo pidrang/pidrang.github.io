@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Pidrang blog</title>
+    <link>https://pidrang.dev/blog/</link>
+    <description>Articles about Pidrang: tutorials, architecture and release notes.</description>
+    <language>en</language>
+    <atom:link href="https://pidrang.dev/blog/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Welcome to the Pidrang blog</title>
+      <link>https://pidrang.dev/blog/welcome/</link>
+      <guid isPermaLink="true">https://pidrang.dev/blog/welcome/</guid>
+      <pubDate>Mon, 26 Oct 2026 17:14:08 &#43;0000</pubDate>
+      <description>Why Pidrang opens a blog, and how every post here is written as a GitHub discussion.</description>
+    </item>
+  </channel>
+</rss>

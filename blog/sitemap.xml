@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://pidrang.dev/blog/</loc>
+  </url>
+  <url>
+    <loc>https://pidrang.dev/blog/welcome/</loc>
+    <lastmod>2026-10-26</lastmod>
+  </url>
+  <url>
+    <loc>https://pidrang.dev/blog/categories/community/</loc>
+  </url>
+</urlset>

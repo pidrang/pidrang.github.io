@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Welcome to the Pidrang blog — Pidrang</title>
+<meta name="description" content="Why Pidrang opens a blog, and how every post here is written as a GitHub discussion.">
+<link rel="canonical" href="https://pidrang.dev/blog/welcome/">
+
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Pidrang">
+<meta property="og:url" content="https://pidrang.dev/blog/welcome/">
+<meta property="og:title" content="Welcome to the Pidrang blog — Pidrang">
+<meta property="og:description" content="Why Pidrang opens a blog, and how every post here is written as a GitHub discussion.">
+<meta property="og:image" content="https://pidrang.dev/assets/social/social-card.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Pidrang logo and the tagline Build Angular admin applications faster">
+<meta property="article:published_time" content="2026-10-26T17:14:08Z">
+<meta property="article:modified_time" content="2026-10-26T17:14:45Z">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"fetrarij","url":"https://github.com/fetrarij"},"dateModified":"2026-10-26T17:14:45Z","datePublished":"2026-10-26T17:14:08Z","description":"Why Pidrang opens a blog, and how every post here is written as a GitHub discussion.","headline":"Welcome to the Pidrang blog","image":{"@type":"ImageObject","url":"https://pidrang.dev/assets/social/social-card.png"},"publisher":{"@type":"Organization","name":"Pidrang"},"url":"https://pidrang.dev/blog/welcome/"}</script>
+
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://pidrang.dev/assets/social/social-card.png">
+
+<link rel="icon" type="image/png" sizes="32x32" href="/assets/logo/favicon-32.png">
+<link rel="apple-touch-icon" href="/assets/logo/apple-touch-icon-180.png">
+<link rel="alternate" type="application/rss+xml" title="Pidrang blog" href="https://pidrang.dev/blog/index.xml">
+<link rel="stylesheet" href="/styles.css">
+
+</head>
+<body>
+      <header class="site-header">
+    <a class="brand" href="/">
+      <img src="/assets/logo/mark-light-500.png" alt="" width="484" height="500">
+      <span>Pidrang</span>
+    </a>
+    <nav class="site-nav" aria-label="Main">
+      <a href="/docs/">Docs</a>
+      <a href="https://github.com/pidrang/pidrang/blob/main/ROADMAP.md">Roadmap</a>
+      <a href="/demos/">Demo</a>
+    </nav>
+    <a class="button button-small" href="https://github.com/pidrang/pidrang">GitHub</a>
+  </header>
+
+  <main>
+    
+    <article>
+      <div class="page-head">
+        <h1 class="page-title">Welcome to the Pidrang blog</h1>
+        <p class="post-meta">
+          <time datetime="2026-10-26T17:14:08Z">2026-10-26</time>
+          in <a href="/blog/categories/community/">community</a>
+          By <a href="https://github.com/fetrarij">fetrarij</a>
+        </p>
+      </div>
+
+      <div class="post-body">
+        <h1 id="welcome-to-the-pidrang-blog">Welcome to the Pidrang blog</h1>
+<p>This is the first post of <a href="https://pidrang.dev">Pidrang</a>, an open-source headless admin framework for Angular. It is also the post that explains how the others are written, so it doubles as its own example.</p>
+<h2 id="what-pidrang-is">What Pidrang is</h2>
+<p>Pidrang generates an Angular admin application from an existing database. Each package does one job:</p>
+<ul>
+<li><code>@pidrang/core</code> holds the contracts and the signal-first primitives: <code>Resource</code>, <code>DataProvider</code>, <code>providePidrang</code>, <code>injectResourceList</code>. It depends on <code>@angular/core</code> only.</li>
+<li><code>@pidrang/supabase</code> implements <code>DataProvider</code> and <code>AuthProvider</code> on top of Supabase.</li>
+<li><code>@pidrang/material</code> and <code>@pidrang/tailwind</code> render the same tables and forms, one with Angular Material, one with Tailwind.</li>
+<li><code>@pidrang/cli</code> turns a schema into resource definitions and working CRUD pages.</li>
+</ul>
+<p>The two demo applications show the same admin on both UI layers, backed by the same Supabase project.</p>
+<h2 id="why-a-blog">Why a blog</h2>
+<p>Some decisions do not fit in a changelog: why the core package refuses to know about any component library, why the generated forms use Signal Forms, how a data source is added without touching the core. Those deserve a paragraph, not a line. Tutorials and release notes have a place here too.</p>
+<h2 id="how-these-posts-are-written">How these posts are written</h2>
+<p>Every article on this blog is a GitHub discussion of the Pidrang repository. This text is that discussion. The site rebuilds itself from the Blog category after each change:</p>
+<ol>
+<li>The discussion title becomes the page title.</li>
+<li>The body, in GitHub Markdown, becomes the page.</li>
+<li>A label, such as <code>blog: community</code>, picks the category.</li>
+<li>A small metadata block at the top of the body, hidden by GitHub, gives the URL slug and the page description.</li>
+</ol>
+<p>The comments are the comments of the discussion, so a question asked under a post stays with it.</p>
+<p>The writing guide lives in <code>blog-src/README.md</code> of the site repository.</p>
+<h2 id="what-comes-next">What comes next</h2>
+<p>Expect short posts: how a resource is described, what happens between a schema and a list page, and what changed in each release. If you have a question, open an issue in the repository.</p>
+<p>Thanks for reading.</p>
+
+      </div>
+
+      <section class="post-comments" aria-labelledby="post-discussion">
+        <h2 id="post-discussion" class="sr-only">Comments</h2>
+        <p>Comments come from <a class="text-link" href="https://github.com/orgs/pidrang/discussions/141">the discussion on GitHub</a>.</p>
+          <script src="https://giscus.app/client.js"
+          data-repo="pidrang/pidrang"
+          data-repo-id="R_kgDOUX_n1g"
+          data-category="Blog"
+          data-category-id="DIC_kwDOUX_n1s4DJqh0"
+          data-mapping="number"
+          data-term="141"
+          data-reactions-enabled="1"
+          data-emit-metadata="0"
+          data-input-position="bottom"
+          data-theme="dark"
+          data-lang="en"
+          data-loading="lazy"
+          crossorigin="anonymous"
+          async></script>
+
+      </section>
+    </article>
+
+  </main>
+  <footer class="footer">
+    <a href="mailto:contact@pidrang.dev">contact@pidrang.dev</a>
+    <a href="https://github.com/pidrang/pidrang">GitHub</a>
+    <a href="https://www.npmjs.com/org/pidrang">npm</a>
+    <a href="https://github.com/pidrang/pidrang/blob/main/LICENSE">MIT License</a>
+    <a href="/privacy/">Privacy</a>
+    <p class="footer-note">Inspired by Refine. Not affiliated with Angular or Refine.</p>
+  </footer>
+
+  <script data-goatcounter="https://pidrang.goatcounter.com/count"
+          async src="//gc.zgo.at/count.js"></script>
+</body>
+</html>
