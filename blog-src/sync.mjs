@@ -1,5 +1,5 @@
 import { execFile } from "node:child_process";
-import { existsSync, readdirSync } from "node:fs";
+import { readdirSync, statSync } from "node:fs";
 import { cp, mkdir, mkdtemp, readdir, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
@@ -19,7 +19,7 @@ export const REPORT_FOOTER = "Merging publishes these changes to https://pidrang
 
 const SLUG_PATTERN = /^[a-z0-9]+(-[a-z0-9]+)*$/;
 const COVER_PATTERN = /^\/assets\/blog\/[A-Za-z0-9._-]+$/;
-const META_BLOCK_PATTERN = /^[\t ]*(?:\r?\n)*<!--([\s\S]*?)-->/;
+const META_BLOCK_PATTERN = /^\s*<!--([\s\S]*?)-->/;
 
 const CATEGORY_QUERY = `
   query BlogCategory($owner: String!, $name: String!) {
@@ -97,7 +97,7 @@ export function parseMetadataBlock(body) {
     }
     meta[key] = value;
   }
-  const content = body.slice(match[0].length).replace(/^[\t ]*(?:\r?\n)+/, "");
+  const content = body.slice(match[0].length).replace(/^\s+/, "");
   return { meta, content, errors };
 }
 
@@ -126,9 +126,19 @@ function coverError(cover, siteRoot) {
   if (!COVER_PATTERN.test(cover)) {
     return `cover must match ${COVER_PATTERN.source}`;
   }
-  const file = join(siteRoot, ...cover.slice(1).split("/"));
-  if (!existsSync(file)) {
+  const segments = cover.slice(1).split("/");
+  if (segments.some((segment) => segment === "." || segment === "..")) {
+    return `cover must not contain "." or ".." segments: ${cover}`;
+  }
+  const file = join(siteRoot, ...segments);
+  let stats;
+  try {
+    stats = statSync(file);
+  } catch {
     return `cover file not found in the site repository: ${cover}`;
+  }
+  if (!stats.isFile()) {
+    return `cover is not a file in the site repository: ${cover}`;
   }
   return undefined;
 }
@@ -359,12 +369,12 @@ export function assertOutput(root, entries = readdirSync(root, { withFileTypes: 
 export function checkOutput(root, slugs) {
   const { errors } = assertOutput(root);
   for (const slug of slugs) {
-    if (!existsSync(join(root, BLOG_DIR, slug, "index.html"))) {
+    if (!statSync(join(root, BLOG_DIR, slug, "index.html"), { throwIfNoEntry: false })?.isFile()) {
       errors.push(`missing ${BLOG_DIR}/${slug}/index.html`);
     }
   }
   for (const file of ["index.xml", "sitemap.xml"]) {
-    if (!existsSync(join(root, BLOG_DIR, file))) {
+    if (!statSync(join(root, BLOG_DIR, file), { throwIfNoEntry: false })?.isFile()) {
       errors.push(`missing ${BLOG_DIR}/${file}`);
     }
   }
@@ -472,6 +482,7 @@ async function runHugo(contentDir, destination, workDir) {
 }
 
 export async function sync(options, env = process.env) {
+  const siteRoot = options.siteRoot ?? SITE_ROOT;
   const discussions = options.fixtures !== undefined
     ? await loadFixtures(options.fixtures)
     : await fetchDiscussionsFromEnv(env);
@@ -483,13 +494,10 @@ export async function sync(options, env = process.env) {
     }
   }
   const kept = discussions.filter((discussion) => authorError(discussion) === undefined);
-  const { errors, posts } = validateDiscussions(kept);
+  const { errors, posts } = validateDiscussions(kept, siteRoot);
 
   if (errors.length > 0) {
     const lines = errors.flatMap(({ discussion, messages }) => messages.map((message) => `#${discussion.number} ${discussion.url}: ${message}`));
-    for (const line of lines) {
-      console.error(line);
-    }
     throw new Error(`${lines.join("\n")}\n${errors.length} invalid discussion(s), nothing written`);
   }
 
@@ -506,8 +514,8 @@ export async function sync(options, env = process.env) {
     if (outputErrors.length > 0) {
       throw new Error(`Unexpected Hugo output: ${outputErrors.join("; ")}`);
     }
-    const change = await compareOutput(SITE_ROOT, publicDir);
-    await installOutput(publicDir, SITE_ROOT);
+    const change = await compareOutput(siteRoot, publicDir);
+    await installOutput(publicDir, siteRoot);
     const report = buildReport(change, discussions);
     return { change, report };
   } finally {
