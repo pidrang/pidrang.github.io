@@ -1,0 +1,42 @@
+baseURL = "https://pidrang.dev/"
+locale = "en"
+title = "Pidrang"
+timeZone = "UTC"
+disableKinds = ["home", "sitemap", "robotsTXT", "404", "taxonomy"]
+
+[taxonomies]
+category = "categories"
+
+[permalinks.page]
+blog = "/blog/:slug/"
+
+[permalinks.term]
+categories = "/blog/categories/:slug/"
+
+[outputs]
+section = ["html", "rss", "blogsitemap"]
+term = ["html"]
+page = ["html"]
+
+[outputFormats.blogsitemap]
+mediaType = "application/xml"
+baseName = "sitemap"
+isPlainText = true
+
+[markup.goldmark.renderer]
+unsafe = false
+
+[markup.highlight]
+noClasses = true
+style = "github-dark"
+
+[params]
+description = "Articles about Pidrang: tutorials, architecture and release notes."
+socialCard = "/assets/social/social-card.png"
+socialCardAlt = "Pidrang logo and the tagline Build Angular admin applications faster"
+socialCardWidth = 1200
+socialCardHeight = 630
+giscusRepo = "pidrang/pidrang"
+giscusRepoId = "R_kgDOUX_n1g"
+giscusCategory = "Blog"
+giscusCategoryId = "DIC_kwDOUX_n1s4DJqh0"

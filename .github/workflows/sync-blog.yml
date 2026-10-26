@@ -1,0 +1,114 @@
+name: Sync blog
+
+on:
+  discussion:
+    types: [created, edited, deleted, transferred, category_changed, labeled, unlabeled]
+  workflow_dispatch:
+    inputs:
+      dry-run:
+        description: Build and upload blog/ as an artifact, open no pull request.
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: sync-blog
+  cancel-in-progress: true
+
+env:
+  HUGO_VERSION: 0.168.0
+  SOURCE_REPOSITORY: ${{ vars.BLOG_SOURCE_REPOSITORY || 'pidrang/pidrang' }}
+
+jobs:
+  sync:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+
+      - name: Install Hugo
+        run: |
+          set -euo pipefail
+          dir="$RUNNER_TEMP/hugo"
+          mkdir -p "$dir"
+          base="https://github.com/gohugoio/hugo/releases/download/v$HUGO_VERSION"
+          archive="hugo_${HUGO_VERSION}_linux-amd64.tar.gz"
+          curl -fsSL -o "$dir/$archive" "$base/$archive"
+          curl -fsSL -o "$dir/checksums.txt" "$base/hugo_${HUGO_VERSION}_checksums.txt"
+          (cd "$dir" && sha256sum -c --ignore-missing checksums.txt)
+          tar -xzf "$dir/$archive" -C "$dir" hugo
+          echo "HUGO_BIN=$dir/hugo" >> "$GITHUB_ENV"
+
+      - name: Build blog/ from the Blog discussions
+        env:
+          GITHUB_TOKEN: ${{ secrets.MONOREPO_READ_TOKEN || github.token }}
+        run: |
+          set -euo pipefail
+          node blog-src/sync.mjs --report "$RUNNER_TEMP/blog-report.md"
+
+      - name: Upload blog/ (dry run)
+        if: ${{ inputs.dry-run == true }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: blog
+          path: blog/
+
+      - name: Check that only blog/ changed
+        if: ${{ inputs.dry-run != true }}
+        run: |
+          set -euo pipefail
+          outside=$(git status --porcelain -- . ':!blog')
+          if [ -n "$outside" ]; then
+            echo "The sync changed files outside blog/:" >&2
+            echo "$outside" >&2
+            exit 1
+          fi
+
+      - name: Stop when the blog is already in sync
+        id: diff
+        if: ${{ inputs.dry-run != true }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          if [ -n "$(git status --porcelain -- blog)" ]; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          echo "Blog already in sync"
+          numbers=$(gh pr list --head blog/sync --state open --json number --jq '.[].number')
+          for number in $numbers; do
+            gh pr close "$number" --delete-branch --comment "The blog is already in sync with main."
+          done
+          echo "changed=false" >> "$GITHUB_OUTPUT"
+
+      - name: Commit, push and open or update the pull request
+        if: ${{ inputs.dry-run != true && steps.diff.outputs.changed == 'true' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPORT: ${{ runner.temp }}/blog-report.md
+        run: |
+          set -euo pipefail
+          branch=blog/sync
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git switch -c "$branch"
+          git add -- blog
+          git commit -m "chore(blog): sync posts from discussions"
+          # A retried run recreates the same branch; fetch its current tip first so the lease is not stale
+          git fetch origin "refs/heads/$branch:refs/remotes/origin/$branch" || true
+          git push --force-with-lease="refs/heads/$branch:$(git rev-parse "refs/remotes/origin/$branch" 2>/dev/null || echo '')" origin "$branch"
+          number=$(gh pr list --head "$branch" --state open --json number --jq '.[0].number // empty')
+          if [ -n "$number" ]; then
+            gh pr edit "$number" --body-file "$REPORT"
+          else
+            gh pr create --base main --head "$branch" \
+              --title "chore(blog): sync posts from discussions" \
+              --body-file "$REPORT"
+          fi

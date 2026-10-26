@@ -1,3 +1,5 @@
 User-agent: *
 Allow: /
+Disallow: /blog-src/
 Sitemap: https://pidrang.dev/sitemap.xml
+Sitemap: https://pidrang.dev/blog/sitemap.xml

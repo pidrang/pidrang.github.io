@@ -1,0 +1,34 @@
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+{{- $pageTitle := cond (eq .Title "Blog") "Blog — Pidrang" (cond (eq .Kind "term") (printf "%s — Pidrang blog" (.Title | humanize | title)) (printf "%s — Pidrang" .Title)) }}
+{{- $pageDescription := cond (ne .Description "") .Description site.Params.description }}
+{{- $image := site.Params.socialCard }}
+{{- if .Params.cover }}{{ $image = .Params.cover }}{{ end }}
+<title>{{ $pageTitle }}</title>
+<meta name="description" content="{{ $pageDescription }}">
+<link rel="canonical" href="{{ .Permalink }}">
+
+<meta property="og:type" content="{{ if and (eq .Kind "page") (eq .Type "blog") }}article{{ else }}website{{ end }}">
+<meta property="og:site_name" content="Pidrang">
+<meta property="og:url" content="{{ .Permalink }}">
+<meta property="og:title" content="{{ $pageTitle }}">
+<meta property="og:description" content="{{ $pageDescription }}">
+<meta property="og:image" content="{{ $image | absURL }}">
+{{- if not .Params.cover }}
+<meta property="og:image:width" content="{{ site.Params.socialCardWidth }}">
+<meta property="og:image:height" content="{{ site.Params.socialCardHeight }}">
+{{- end }}
+<meta property="og:image:alt" content="{{ if .Params.cover }}{{ .Params.cover_alt }}{{ else }}{{ site.Params.socialCardAlt }}{{ end }}">
+{{- if and (eq .Kind "page") (eq .Type "blog") }}
+<meta property="article:published_time" content="{{ .Date.Format "2006-01-02T15:04:05Z07:00" }}">
+<meta property="article:modified_time" content="{{ .Lastmod.Format "2006-01-02T15:04:05Z07:00" }}">
+<script type="application/ld+json">{{ dict "@context" "https://schema.org" "@type" "BlogPosting" "headline" .Title "description" .Description "datePublished" (.Date.Format "2006-01-02T15:04:05Z07:00") "dateModified" (.Lastmod.Format "2006-01-02T15:04:05Z07:00") "url" .Permalink "image" (dict "@type" "ImageObject" "url" ($image | absURL)) "author" (dict "@type" "Person" "name" .Params.author "url" .Params.author_url) "publisher" (dict "@type" "Organization" "name" "Pidrang") | jsonify | safeJS }}</script>
+{{- end }}
+
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="{{ $image | absURL }}">
+
+<link rel="icon" type="image/png" sizes="32x32" href="/assets/logo/favicon-32.png">
+<link rel="apple-touch-icon" href="/assets/logo/apple-touch-icon-180.png">
+<link rel="alternate" type="application/rss+xml" title="Pidrang blog" href="https://pidrang.dev/blog/index.xml">
+<link rel="stylesheet" href="/styles.css">
