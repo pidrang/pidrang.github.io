@@ -334,7 +334,7 @@ test("fetchDiscussions reads the blog category and the discussions", async () =>
       return { repository: { discussionCategory: { id: "DIC_test" } } };
     }
     return {
-      node: {
+      repository: {
         discussions: {
           pageInfo: { hasNextPage: false },
           nodes: [{
@@ -356,6 +356,10 @@ test("fetchDiscussions reads the blog category and the discussions", async () =>
   assert.equal(calls.length, 2);
   assert.equal(calls[0].variables.owner, "pidrang");
   assert.equal(calls[1].variables.categoryId, "DIC_test");
+  assert.equal(calls[1].variables.owner, "pidrang");
+  assert.equal(calls[1].variables.name, "pidrang");
+  assert.ok(calls[1].query.includes("discussions(first: 100, categoryId: $categoryId)"));
+  assert.equal(/type DiscussionCategory/.test(calls[1].query), false);
   assert.equal(discussions[0].slug, "from-body");
   assert.equal(discussions[0].discussionUrl, "https://github.com/pidrang/pidrang/discussions/5");
   assert.deepEqual(validateDiscussions(discussions).errors, []);
@@ -370,7 +374,7 @@ test("fetchDiscussions fails on missing category, API errors and pagination", as
   await assert.rejects(fetchDiscussions({ repository: "pidrang/pidrang", token: "t", fetchGraphql: failing }), /boom/);
   const paginated = async (_token, query) => (query.includes("discussionCategory(slug")
     ? { repository: { discussionCategory: { id: "DIC_test" } } }
-    : { node: { discussions: { pageInfo: { hasNextPage: true }, nodes: [] } } });
+    : { repository: { discussions: { pageInfo: { hasNextPage: true }, nodes: [] } } });
   await assert.rejects(fetchDiscussions({ repository: "pidrang/pidrang", token: "t", fetchGraphql: paginated }), /more than 100/);
   await assert.rejects(fetchDiscussions({ repository: "pidrang", token: "t", fetchGraphql: missing }), /owner\/name/);
 });
