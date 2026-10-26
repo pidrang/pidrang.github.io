@@ -1,0 +1,41 @@
+{
+  "discussions": [
+    {
+      "number": 12,
+      "title": "Signal-first CRUD: one list page per table",
+      "body": "<!--\nslug: signal-first-crud\ndescription: One list page for every table with Angular 22 resource() and a typed Resource.\n-->\nPidrang turns a Supabase table into a typed `Resource`, and one generic list page renders all of them.\n\n## The \"resource\" contract: signals first\n\n`injectResourceList` wraps `DataProvider.getList` in Angular's `resource()`.\n\n```ts\nconst list = injectResourceList<Row>('users');\n```\n\n| Part | Role |\n| --- | --- |\n| `resources` | One `Resource` per table |\n| `dataProvider` | Reads and writes rows |\n| `fields` | Types for the table and the form |\n",
+      "createdAt": "2026-10-20T09:30:00Z",
+      "updatedAt": "2026-10-22T14:05:00Z",
+      "url": "https://github.com/pidrang/pidrang/discussions/12",
+      "authorAssociation": "OWNER",
+      "author": {
+        "login": "fetrarij",
+        "url": "https://github.com/fetrarij"
+      },
+      "labels": {
+        "nodes": [
+          { "name": "blog: tutorials" },
+          { "name": "help wanted" }
+        ]
+      }
+    },
+    {
+      "number": 13,
+      "title": "Why @pidrang/core knows nothing about Material",
+      "body": "<!--\nslug: ui-agnostic-core\ndescription: The core package holds contracts and signals only, so Material, Tailwind and PrimeNG can each build on it.\n-->\nThe core package depends on `@angular/core` and nothing else.\n\n> A UI package can be replaced without touching the contracts.\n\n- `@pidrang/material` renders with Angular Material.\n- `@pidrang/tailwind` renders the same API with utility classes.\n\nSee [the architecture notes](https://github.com/pidrang/pidrang/blob/main/docs/architecture.md).\n",
+      "createdAt": "2026-10-18T16:00:00Z",
+      "updatedAt": "2026-10-18T16:00:00Z",
+      "url": "https://github.com/pidrang/pidrang/discussions/13",
+      "authorAssociation": "MEMBER",
+      "author": {
+        "login": "fetrarij",
+        "url": "https://github.com/fetrarij"
+      },
+      "labels": {
+        "nodes": [
+          { "name": "blog: architecture" }
+        ]
+      }
+    }
+  ]
+}

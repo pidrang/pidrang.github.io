@@ -1,0 +1,24 @@
+{{ define "main" }}
+    <article>
+      <div class="page-head">
+        <h1 class="page-title">{{ .Title }}</h1>
+        <p class="post-meta">
+          Published <time datetime="{{ .Date.Format "2006-01-02T15:04:05Z07:00" }}">{{ .Date.Format "2006-01-02" }}</time>
+          {{- range .Params.categories }}
+          in <a href="{{ printf "/blog/categories/%s/" . | relURL }}">{{ . }}</a>
+          {{- end }}
+          by <a href="{{ .Params.author_url }}">{{ .Params.author }}</a>
+        </p>
+      </div>
+
+      <div class="post-body">
+        {{ .Content }}
+      </div>
+
+      <section class="post-comments" aria-labelledby="post-discussion">
+        <h2 id="post-discussion" class="sr-only">Comments</h2>
+        <p>Comments come from <a class="text-link" href="{{ .Params.discussion_url }}">the discussion on GitHub</a>.</p>
+        {{ partial "giscus.html" . }}
+      </section>
+    </article>
+{{ end }}
