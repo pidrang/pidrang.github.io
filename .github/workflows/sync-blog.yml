@@ -99,8 +99,7 @@ jobs:
           git switch -c "$branch"
           git add -- blog
           git commit -m "chore(blog): sync posts from discussions"
-          git fetch origin "refs/heads/$branch:refs/remotes/origin/$branch" || true
-          git push --force-with-lease="refs/heads/$branch:$(git rev-parse "refs/remotes/origin/$branch" 2>/dev/null || echo '')" origin "$branch"
+          git push --force-with-lease origin "$branch"
           number=$(gh pr list --head "$branch" --state open --json number --jq '.[0].number // empty')
           if [ -n "$number" ]; then
             gh pr edit "$number" --body-file "$REPORT"
