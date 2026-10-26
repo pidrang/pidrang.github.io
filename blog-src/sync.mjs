@@ -32,29 +32,27 @@ const CATEGORY_QUERY = `
 `;
 
 const DISCUSSIONS_QUERY = `
-  query BlogPosts($categoryId: ID!) {
-    node(id: $categoryId) {
-      ... on DiscussionCategory {
-        discussions(first: 100) {
-          pageInfo {
-            hasNextPage
-          }
-          nodes {
-            number
-            title
-            body
-            createdAt
-            updatedAt
+  query BlogPosts($owner: String!, $name: String!, $categoryId: ID!) {
+    repository(owner: $owner, name: $name) {
+      discussions(first: 100, categoryId: $categoryId) {
+        pageInfo {
+          hasNextPage
+        }
+        nodes {
+          number
+          title
+          body
+          createdAt
+          updatedAt
+          url
+          authorAssociation
+          author {
+            login
             url
-            authorAssociation
-            author {
-              login
-              url
-            }
-            labels(first: 20) {
-              nodes {
-                name
-              }
+          }
+          labels(first: 20) {
+            nodes {
+              name
             }
           }
         }
@@ -236,9 +234,9 @@ export function validateDiscussions(discussions, siteRoot = SITE_ROOT) {
         const message = `slug "${slug}" is used by several discussions: ${group.map((item) => `#${item.number}`).join(", ")}`;
         const existing = errors.find((entry) => entry.discussion.number === discussion.number);
         if (existing) {
-          existing.messages.push(message);
+        existing.messages.push(message);
         } else {
-          errors.push({ discussion, messages: [message] });
+        errors.push({ discussion, messages: [message] });
         }
       }
     }
@@ -427,8 +425,8 @@ export async function fetchDiscussions({ repository, token, fetchGraphql = graph
   if (categoryId === undefined) {
     throw new Error(`The repository ${owner}/${name} has no "blog" discussion category`);
   }
-  const data = await fetchGraphql(token, DISCUSSIONS_QUERY, { categoryId });
-  const connection = data.node?.discussions;
+  const data = await fetchGraphql(token, DISCUSSIONS_QUERY, { owner, name, categoryId });
+  const connection = data.repository?.discussions;
   if (connection?.pageInfo?.hasNextPage) {
     throw new Error("The Blog category has more than 100 discussions: pagination is not supported");
   }
