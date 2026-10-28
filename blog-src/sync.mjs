@@ -95,7 +95,11 @@ export function parseMetadataBlock(body) {
     }
     meta[key] = value;
   }
-  const content = body.slice(match[0].length).replace(/^\s+/, "");
+  // The layout renders the discussion title as the page h1, so a leading h1 in the body is dropped
+  const content = body
+    .slice(match[0].length)
+    .replace(/^\s+/, "")
+    .replace(/^#\s+[^\n]*(?:\r?\n)+/, "");
   return { meta, content, errors };
 }
 
