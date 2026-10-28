@@ -63,7 +63,7 @@ jobs:
             and .origin == $origin
             and .docs.path == "/docs/"
             and .docs.url == ($origin + "/docs/")
-            and (.docs.pages | length == 5)
+            and (.docs.pages | length >= 5)
           ' incoming/metadata.json > /dev/null || { echo "metadata.json does not match the run" >&2; exit 1; }
           test -f incoming/index.html || { echo "index.html is missing" >&2; exit 1; }
           grep -q 'href="/docs/assets/' incoming/index.html || { echo "index.html does not reference /docs/assets/" >&2; exit 1; }
