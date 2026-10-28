@@ -2,23 +2,32 @@
   "schema": 1,
   "source": {
     "repository": "pidrang/pidrang",
-    "commit": "8c666a2084de4cc5a7c841e052669abb835adf9e",
+    "commit": "88fa1b413884da0f88cd718b80a86259b3049a66",
     "ref": "main",
     "dirty": false,
     "workflow": "Docs artifacts",
-    "runId": "39478137872"
+    "runId": "40734735922"
   },
-  "builtAt": "2026-10-20T18:50:11.371Z",
+  "builtAt": "2026-10-28T17:20:50.554Z",
   "origin": "https://pidrang.dev",
   "docs": {
     "path": "/docs/",
     "url": "https://pidrang.dev/docs/",
     "pages": [
-      "getting-started",
+      "index",
       "architecture",
+      "authentication",
       "data-providers",
+      "demo-artifacts",
       "design-notes",
-      "releasing"
+      "getting-started",
+      "reference/cli",
+      "reference/components",
+      "reference/core",
+      "releasing",
+      "ui-layers/index",
+      "ui-layers/material",
+      "ui-layers/tailwind"
     ]
   }
 }
