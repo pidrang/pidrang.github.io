@@ -217,6 +217,13 @@ test("spaces and blank lines before the metadata block are accepted", () => {
   assert.match(parseMetadataBlock(`text\n<!--\nslug: a-post\n-->`).error, /does not start with a metadata block/);
 });
 
+test("a leading h1 in the body is dropped, since the layout renders the title", () => {
+  const body = `<!--\nslug: a-post\ndescription: ${DESCRIPTION}\n-->\n# The post title\n\nThe body.\n`;
+  assert.equal(parseMetadataBlock(body).content, "The body.\n");
+  const kept = `<!--\nslug: a-post\ndescription: ${DESCRIPTION}\n-->\nIntro.\n\n# A section\n`;
+  assert.match(parseMetadataBlock(kept).content, /^Intro\./);
+});
+
 test("every error is collected with number and URL", () => {
   const bad = discussion({ number: 42, url: URL_42, slug: "Bad Slug", body: "No block\nuser-attachments\n<script>", labels: { nodes: [] } });
   const result = validateDiscussions([bad]);
