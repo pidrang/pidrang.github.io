@@ -99,7 +99,14 @@ jobs:
           git switch -c "$branch"
           git add -- blog
           git commit -m "chore(blog): sync posts from discussions"
-          git push --force-with-lease origin "$branch"
+          # A merged run leaves the branch behind; lease against its remote tip when it exists
+          git fetch origin "refs/heads/$branch:refs/remotes/origin/$branch" || true
+          tip=$(git rev-parse --verify --quiet "refs/remotes/origin/$branch" || true)
+          if [ -n "$tip" ]; then
+            git push --force-with-lease="refs/heads/$branch:$tip" origin "$branch"
+          else
+            git push origin "$branch"
+          fi
           number=$(gh pr list --head "$branch" --state open --json number --jq '.[0].number // empty')
           if [ -n "$number" ]; then
             gh pr edit "$number" --body-file "$REPORT"
