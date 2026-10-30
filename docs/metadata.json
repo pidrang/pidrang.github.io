@@ -2,13 +2,13 @@
   "schema": 1,
   "source": {
     "repository": "pidrang/pidrang",
-    "commit": "88fa1b413884da0f88cd718b80a86259b3049a66",
+    "commit": "19d171c54952a3fdf13f656119575cda3014d61b",
     "ref": "main",
     "dirty": false,
     "workflow": "Docs artifacts",
-    "runId": "40734735922"
+    "runId": "41056711145"
   },
-  "builtAt": "2026-10-28T17:20:50.554Z",
+  "builtAt": "2026-10-30T12:37:48.572Z",
   "origin": "https://pidrang.dev",
   "docs": {
     "path": "/docs/",
@@ -21,6 +21,7 @@
       "demo-artifacts",
       "design-notes",
       "getting-started",
+      "manual-setup",
       "reference/cli",
       "reference/components",
       "reference/core",
