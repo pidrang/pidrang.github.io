@@ -4,10 +4,17 @@
     <loc>https://pidrang.dev/blog/</loc>
   </url>
   <url>
+    <loc>https://pidrang.dev/blog/pidrang-0-1-1/</loc>
+    <lastmod>2026-11-06</lastmod>
+  </url>
+  <url>
     <loc>https://pidrang.dev/blog/welcome/</loc>
-    <lastmod>2026-10-26</lastmod>
+    <lastmod>2026-11-06</lastmod>
   </url>
   <url>
     <loc>https://pidrang.dev/blog/categories/community/</loc>
+  </url>
+  <url>
+    <loc>https://pidrang.dev/blog/categories/releases/</loc>
   </url>
 </urlset>
