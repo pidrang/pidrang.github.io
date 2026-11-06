@@ -7,6 +7,13 @@
     <language>en</language>
     <atom:link href="https://pidrang.dev/blog/index.xml" rel="self" type="application/rss+xml" />
     <item>
+      <title>Pidrang 0.1.1: a working Angular admin from your Supabase schema</title>
+      <link>https://pidrang.dev/blog/pidrang-0-1-1/</link>
+      <guid isPermaLink="true">https://pidrang.dev/blog/pidrang-0-1-1/</guid>
+      <pubDate>Fri, 06 Nov 2026 15:50:12 &#43;0000</pubDate>
+      <description>Pidrang 0.1.1 installs, wires and generates a working Angular admin from your Supabase schema, with sign-in and navigation.</description>
+    </item>
+    <item>
       <title>Welcome to the Pidrang blog</title>
       <link>https://pidrang.dev/blog/welcome/</link>
       <guid isPermaLink="true">https://pidrang.dev/blog/welcome/</guid>

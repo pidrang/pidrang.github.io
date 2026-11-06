@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pidrang 0.1.1: a working Angular admin from your Supabase schema — Pidrang</title>
+<meta name="description" content="Pidrang 0.1.1 installs, wires and generates a working Angular admin from your Supabase schema, with sign-in and navigation.">
+<link rel="canonical" href="https://pidrang.dev/blog/pidrang-0-1-1/">
+
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Pidrang">
+<meta property="og:url" content="https://pidrang.dev/blog/pidrang-0-1-1/">
+<meta property="og:title" content="Pidrang 0.1.1: a working Angular admin from your Supabase schema — Pidrang">
+<meta property="og:description" content="Pidrang 0.1.1 installs, wires and generates a working Angular admin from your Supabase schema, with sign-in and navigation.">
+<meta property="og:image" content="https://pidrang.dev/assets/social/social-card.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Pidrang logo and the tagline Build Angular admin applications faster">
+<meta property="article:published_time" content="2026-11-06T15:50:12Z">
+<meta property="article:modified_time" content="2026-11-06T15:50:12Z">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"fetrarij","url":"https://github.com/fetrarij"},"dateModified":"2026-11-06T15:50:12Z","datePublished":"2026-11-06T15:50:12Z","description":"Pidrang 0.1.1 installs, wires and generates a working Angular admin from your Supabase schema, with sign-in and navigation.","headline":"Pidrang 0.1.1: a working Angular admin from your Supabase schema","image":{"@type":"ImageObject","url":"https://pidrang.dev/assets/social/social-card.png"},"publisher":{"@type":"Organization","name":"Pidrang"},"url":"https://pidrang.dev/blog/pidrang-0-1-1/"}</script>
+
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://pidrang.dev/assets/social/social-card.png">
+
+<link rel="icon" type="image/png" sizes="32x32" href="/assets/logo/favicon-32.png">
+<link rel="apple-touch-icon" href="/assets/logo/apple-touch-icon-180.png">
+<link rel="alternate" type="application/rss+xml" title="Pidrang blog" href="https://pidrang.dev/blog/index.xml">
+<link rel="stylesheet" href="/styles.css">
+
+</head>
+<body>
+      <header class="site-header">
+    <a class="brand" href="/">
+      <img src="/assets/logo/mark-light-500.png" alt="" width="484" height="500">
+      <span>Pidrang</span>
+    </a>
+    <nav class="site-nav" aria-label="Main">
+      <a href="/docs/">Docs</a>
+      <a href="https://github.com/pidrang/pidrang/blob/main/ROADMAP.md">Roadmap</a>
+      <a href="/demos/">Demo</a>
+      <a href="/blog/" aria-current="page">Blog</a>
+    </nav>
+    <a class="button button-small" href="https://github.com/pidrang/pidrang">GitHub</a>
+  </header>
+
+  <main>
+    
+    <article>
+      <div class="page-head">
+        <h1 class="page-title">Pidrang 0.1.1: a working Angular admin from your Supabase schema</h1>
+        <p class="post-meta">
+          <time datetime="2026-11-06T15:50:12Z">2026-11-06</time>
+          in <a href="/blog/categories/releases/">releases</a>
+          By <a href="https://github.com/fetrarij">fetrarij</a>
+        </p>
+      </div>
+
+      <div class="post-body">
+        <p>Pidrang 0.1.1 is on npm. With 0.1.0, <code>pidrang init</code> wrote the pages, but you still installed the packages, wired four files by hand, and could not save anything without writing a sign-in page. With 0.1.1, a fresh Angular app gets a working admin from one command:</p>
+<div class="highlight"><pre tabindex="0" style="color:#e6edf3;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>ng new my-admin
+</span></span><span style="display:flex;"><span>cd my-admin
+</span></span><span style="display:flex;"><span>npx pidrang init
+</span></span></code></pre></div><p>Answer the questions, put your Supabase publishable key in the two environment files, run <code>ng serve</code>. You get a list, create, show and edit page for each table you picked, delete, a sign-in page and a menu of your tables.</p>
+<h2 id="what-init-does-now">What <code>init</code> does now</h2>
+<ul>
+<li><strong>Installs what the pages need.</strong> It offers to install <code>@pidrang/core</code>, <code>@pidrang/supabase</code>, <code>@pidrang/material</code> and <code>@supabase/supabase-js</code>, and runs <code>ng add @angular/material</code>. Say no and it prints the exact commands.</li>
+<li><strong>Wires the app.</strong> It registers Pidrang and the Supabase client in <code>app.config.ts</code>, adds the routes to <code>app.routes.ts</code> and writes both environment files. A file it cannot edit safely gets a comment with the change to make.</li>
+<li><strong>Generates a sign-in page.</strong> When your Row Level Security policies only let signed-in users write, the app can now save. Signed out, the pages hide Create, Edit and Delete and the forms say &ldquo;Sign in to make changes.&rdquo;</li>
+<li><strong>Lands somewhere useful.</strong> On a new app, <code>/</code> opens the first list, and a layout shows a menu of your tables with a Sign in button.</li>
+<li><strong>Reads your columns better.</strong> Readable labels, <code>created_at</code> and <code>updated_at</code> (also <code>createdAt</code> and <code>updatedAt</code>) read-only, lists newest first, and the &ldquo;database default&rdquo; hint on create only.</li>
+<li><strong>Uses the current Supabase key names.</strong> Publishable and secret, as the dashboard shows them today. The secret key is only used to read your schema; it never goes into the app.</li>
+<li><strong>Can run again.</strong> Run <code>init</code> later to add a table: it adds it to <code>resources.ts</code> and leaves the rest alone.</li>
+</ul>
+<p>All the changes are in the <a href="https://github.com/pidrang/pidrang/blob/main/CHANGELOG.md">changelog</a>.</p>
+<h2 id="known-limits">Known limits</h2>
+<ul>
+<li>The generated CRUD pages use Angular Material. The sign-in page and the layout follow Tailwind when your app uses <code>@pidrang/tailwind</code>; Tailwind CRUD pages are planned (<a href="https://github.com/pidrang/pidrang/issues/61">#61</a>).</li>
+<li>A new app is over Angular&rsquo;s default 500 kB initial budget (<a href="https://github.com/pidrang/pidrang/issues/172">#172</a>).</li>
+<li>Dates show as raw ISO text (<a href="https://github.com/pidrang/pidrang/issues/187">#187</a>).</li>
+<li>If you run <code>init</code> again before setting the key, Next steps no longer reminds you to replace the placeholder (<a href="https://github.com/pidrang/pidrang/issues/192">#192</a>, planned for 0.1.2).</li>
+</ul>
+<h2 id="try-it-help-shape-it">Try it, help shape it</h2>
+<ul>
+<li><a href="https://pidrang.dev/demos/">Live demos</a>, on Angular Material and on Tailwind, built from 0.1.1.</li>
+<li><a href="https://pidrang.dev/docs/getting-started">Getting started</a>.</li>
+<li>Eight <a href="https://github.com/pidrang/pidrang/labels/good%20first%20issue">good first issues</a> are open, each with the files to look at and what &ldquo;done&rdquo; means. A first pull request is welcome.</li>
+<li>Tell us what you are building in <a href="https://github.com/pidrang/pidrang/discussions">Discussions</a>.</li>
+</ul>
+<p>Pidrang is MIT licensed and pre-1.0: the API may still change between minor versions.</p>
+
+      </div>
+
+      <section class="post-comments" aria-labelledby="post-discussion">
+        <h2 id="post-discussion" class="sr-only">Comments</h2>
+        <p>Comments come from <a class="text-link" href="https://github.com/orgs/pidrang/discussions/196">the discussion on GitHub</a>.</p>
+          <script src="https://giscus.app/client.js"
+          data-repo="pidrang/pidrang"
+          data-repo-id="R_kgDOUX_n1g"
+          data-category="Blog"
+          data-category-id="DIC_kwDOUX_n1s4DJqh0"
+          data-mapping="number"
+          data-term="196"
+          data-reactions-enabled="1"
+          data-emit-metadata="0"
+          data-input-position="bottom"
+          data-theme="dark"
+          data-lang="en"
+          data-loading="lazy"
+          crossorigin="anonymous"
+          async></script>
+
+      </section>
+    </article>
+
+  </main>
+  <footer class="footer">
+    <a href="mailto:contact@pidrang.dev">contact@pidrang.dev</a>
+    <a href="https://github.com/pidrang/pidrang">GitHub</a>
+    <a href="https://www.npmjs.com/org/pidrang">npm</a>
+    <a href="https://github.com/pidrang/pidrang/blob/main/LICENSE">MIT License</a>
+    <a href="/privacy/">Privacy</a>
+    <p class="footer-note">Inspired by Refine. Not affiliated with Angular or Refine.</p>
+  </footer>
+
+  <script data-goatcounter="https://pidrang.goatcounter.com/count"
+          async src="//gc.zgo.at/count.js"></script>
+</body>
+</html>
