@@ -2,13 +2,13 @@
   "schema": 1,
   "source": {
     "repository": "pidrang/pidrang",
-    "commit": "88fa1b413884da0f88cd718b80a86259b3049a66",
+    "commit": "ab1dc44a92de4a180b348f09a98e15a8605dd60d",
     "ref": "main",
     "dirty": false,
     "workflow": "Demo artifacts",
-    "runId": "40739262683"
+    "runId": "42213228535"
   },
-  "builtAt": "2026-10-28T17:49:30.789Z",
+  "builtAt": "2026-11-06T11:51:39.815Z",
   "origin": "https://pidrang.dev",
   "demos": [
     {
@@ -23,9 +23,9 @@
     }
   ],
   "packages": {
-    "@pidrang/core": "0.1.0",
-    "@pidrang/supabase": "0.1.0",
-    "@pidrang/material": "0.1.0",
-    "@pidrang/tailwind": "0.1.0"
+    "@pidrang/core": "0.1.1",
+    "@pidrang/supabase": "0.1.1",
+    "@pidrang/material": "0.1.1",
+    "@pidrang/tailwind": "0.1.1"
   }
 }
