@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Signal-first CRUD in Angular 22: one list page for every table — Pidrang</title>
+<meta name="description" content="One list page for every table in Angular 22, with Signals and resource(): describe a Supabase table once, then get the list, forms and row actions.">
+<link rel="canonical" href="https://pidrang.dev/blog/signal-first-crud-angular/">
+
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Pidrang">
+<meta property="og:url" content="https://pidrang.dev/blog/signal-first-crud-angular/">
+<meta property="og:title" content="Signal-first CRUD in Angular 22: one list page for every table — Pidrang">
+<meta property="og:description" content="One list page for every table in Angular 22, with Signals and resource(): describe a Supabase table once, then get the list, forms and row actions.">
+<meta property="og:image" content="https://pidrang.dev/assets/social/social-card.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Pidrang logo and the tagline Build Angular admin applications faster">
+<meta property="article:published_time" content="2026-11-13T11:45:46Z">
+<meta property="article:modified_time" content="2026-11-13T11:45:46Z">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"fetrarij","url":"https://github.com/fetrarij"},"dateModified":"2026-11-13T11:45:46Z","datePublished":"2026-11-13T11:45:46Z","description":"One list page for every table in Angular 22, with Signals and resource(): describe a Supabase table once, then get the list, forms and row actions.","headline":"Signal-first CRUD in Angular 22: one list page for every table","image":{"@type":"ImageObject","url":"https://pidrang.dev/assets/social/social-card.png"},"publisher":{"@type":"Organization","name":"Pidrang"},"url":"https://pidrang.dev/blog/signal-first-crud-angular/"}</script>
+
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://pidrang.dev/assets/social/social-card.png">
+
+<link rel="icon" type="image/png" sizes="32x32" href="/assets/logo/favicon-32.png">
+<link rel="apple-touch-icon" href="/assets/logo/apple-touch-icon-180.png">
+<link rel="alternate" type="application/rss+xml" title="Pidrang blog" href="https://pidrang.dev/blog/index.xml">
+<link rel="stylesheet" href="/styles.css">
+
+</head>
+<body>
+      <header class="site-header">
+    <a class="brand" href="/">
+      <img src="/assets/logo/mark-light-500.png" alt="" width="484" height="500">
+      <span>Pidrang</span>
+    </a>
+    <nav class="site-nav" aria-label="Main">
+      <a href="/docs/">Docs</a>
+      <a href="https://github.com/pidrang/pidrang/blob/main/ROADMAP.md">Roadmap</a>
+      <a href="/demos/">Demo</a>
+      <a href="/blog/" aria-current="page">Blog</a>
+    </nav>
+    <a class="button button-small" href="https://github.com/pidrang/pidrang">GitHub</a>
+  </header>
+
+  <main>
+    
+    <article>
+      <div class="page-head">
+        <h1 class="page-title">Signal-first CRUD in Angular 22: one list page for every table</h1>
+        <p class="post-meta">
+          <time datetime="2026-11-13T11:45:46Z">2026-11-13</time>
+          in <a href="/blog/categories/tutorials/">tutorials</a>
+          By <a href="https://github.com/fetrarij">fetrarij</a>
+        </p>
+      </div>
+
+      <div class="post-body">
+        <p>Admin panels repeat themselves. Every table gets a list page, a create form, an edit form, a delete button, loading and error states. With Signals and the native <code>resource()</code> API, Angular now has what it takes to write that layer once and reuse it for every table.</p>
+<p>This article shows how, using <a href="https://github.com/pidrang/pidrang">Pidrang</a>, an open-source headless admin framework for Angular that I maintain. It is version 0.1.1 and pre-1.0, so the API may still change. The backend here is Supabase, but the pattern does not depend on it.</p>
+<h2 id="what-we-build">What we build</h2>
+<ul>
+<li>A typed <code>Resource</code> that describes a <code>products</code> table.</li>
+<li>One list component that serves every table, driven by a route parameter.</li>
+<li>Per-row edit and delete actions.</li>
+<li>A create form that only sends the fields the user changed.</li>
+</ul>
+<p>Prerequisites: an Angular 22 app with standalone APIs and the router, a Supabase project with a table that has an <code>id</code> primary key, and its URL and publishable key (formerly anon).</p>
+<h2 id="1-install">1. Install</h2>
+<div class="highlight"><pre tabindex="0" style="color:#e6edf3;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>npm install @pidrang/core @pidrang/supabase @pidrang/material @supabase/supabase-js
+</span></span><span style="display:flex;"><span>ng add @angular/material
+</span></span></code></pre></div><p><code>@pidrang/material</code> is one of two UI layers. <code>@pidrang/tailwind</code> offers the same components styled with Tailwind utility classes.</p>
+<h2 id="2-describe-the-table-once">2. Describe the table once</h2>
+<div class="highlight"><pre tabindex="0" style="color:#e6edf3;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-ts" data-lang="ts"><span style="display:flex;"><span><span style="color:#ff7b72">import</span> { Resource } <span style="color:#ff7b72">from</span> <span style="color:#a5d6ff">&#39;@pidrang/core&#39;</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#ff7b72">export</span> <span style="color:#ff7b72">const</span> resources: <span style="color:#ff7b72">Resource</span>[] <span style="color:#ff7b72;font-weight:bold">=</span> [
+</span></span><span style="display:flex;"><span>  {
+</span></span><span style="display:flex;"><span>    name<span style="color:#ff7b72;font-weight:bold">:</span> <span style="color:#a5d6ff">&#39;products&#39;</span>,
+</span></span><span style="display:flex;"><span>    fields<span style="color:#ff7b72;font-weight:bold">:</span> [
+</span></span><span style="display:flex;"><span>      { name<span style="color:#ff7b72;font-weight:bold">:</span> <span style="color:#a5d6ff">&#39;id&#39;</span>, <span style="color:#ff7b72">type</span><span style="color:#ff7b72;font-weight:bold">:</span> <span style="color:#a5d6ff">&#39;text&#39;</span>, readOnly: <span style="color:#ff7b72">true</span> },
+</span></span><span style="display:flex;"><span>      { name<span style="color:#ff7b72;font-weight:bold">:</span> <span style="color:#a5d6ff">&#39;name&#39;</span>, <span style="color:#ff7b72">type</span><span style="color:#ff7b72;font-weight:bold">:</span> <span style="color:#a5d6ff">&#39;text&#39;</span> },
+</span></span><span style="display:flex;"><span>      { name<span style="color:#ff7b72;font-weight:bold">:</span> <span style="color:#a5d6ff">&#39;price&#39;</span>, <span style="color:#ff7b72">type</span><span style="color:#ff7b72;font-weight:bold">:</span> <span style="color:#a5d6ff">&#39;number&#39;</span> },
+</span></span><span style="display:flex;"><span>      { name<span style="color:#ff7b72;font-weight:bold">:</span> <span style="color:#a5d6ff">&#39;in_stock&#39;</span>, label<span style="color:#ff7b72;font-weight:bold">:</span> <span style="color:#a5d6ff">&#39;In stock&#39;</span>, <span style="color:#ff7b72">type</span><span style="color:#ff7b72;font-weight:bold">:</span> <span style="color:#a5d6ff">&#39;boolean&#39;</span> },
+</span></span><span style="display:flex;"><span>      {
+</span></span><span style="display:flex;"><span>        name<span style="color:#ff7b72;font-weight:bold">:</span> <span style="color:#a5d6ff">&#39;created_at&#39;</span>,
+</span></span><span style="display:flex;"><span>        label<span style="color:#ff7b72;font-weight:bold">:</span> <span style="color:#a5d6ff">&#39;Created at&#39;</span>,
+</span></span><span style="display:flex;"><span>        <span style="color:#ff7b72">type</span><span style="color:#ff7b72;font-weight:bold">:</span> <span style="color:#a5d6ff">&#39;timestamp&#39;</span>,
+</span></span><span style="display:flex;"><span>        readOnly: <span style="color:#ff7b72">true</span>,
+</span></span><span style="display:flex;"><span>        hasDefault: <span style="color:#ff7b72">true</span>,
+</span></span><span style="display:flex;"><span>      },
+</span></span><span style="display:flex;"><span>    ],
+</span></span><span style="display:flex;"><span>  },
+</span></span><span style="display:flex;"><span>];
+</span></span></code></pre></div><p><code>name</code> matches the table. Each field has a type (<code>text</code>, <code>number</code>, <code>boolean</code>, <code>date</code>, <code>timestamp</code>, <code>time</code>, <code>numeric</code>), and the UI renders columns and inputs from it. <code>readOnly</code> keeps generated columns out of forms. <code>date</code>, <code>timestamp</code>, <code>time</code> and <code>numeric</code> stay plain strings end to end, so a high-precision number or a zoned time is never rounded through <code>Number</code> or <code>Date</code>.</p>
+<h2 id="3-register-the-providers">3. Register the providers</h2>
+<div class="highlight"><pre tabindex="0" style="color:#e6edf3;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-ts" data-lang="ts"><span style="display:flex;"><span><span style="color:#ff7b72">import</span> { ApplicationConfig } <span style="color:#ff7b72">from</span> <span style="color:#a5d6ff">&#39;@angular/core&#39;</span>;
+</span></span><span style="display:flex;"><span><span style="color:#ff7b72">import</span> { provideRouter, withComponentInputBinding } <span style="color:#ff7b72">from</span> <span style="color:#a5d6ff">&#39;@angular/router&#39;</span>;
+</span></span><span style="display:flex;"><span><span style="color:#ff7b72">import</span> { providePidrang } <span style="color:#ff7b72">from</span> <span style="color:#a5d6ff">&#39;@pidrang/core&#39;</span>;
+</span></span><span style="display:flex;"><span><span style="color:#ff7b72">import</span> { provideSupabaseAuthProvider, provideSupabaseDataProvider } <span style="color:#ff7b72">from</span> <span style="color:#a5d6ff">&#39;@pidrang/supabase&#39;</span>;
+</span></span><span style="display:flex;"><span><span style="color:#ff7b72">import</span> { createClient } <span style="color:#ff7b72">from</span> <span style="color:#a5d6ff">&#39;@supabase/supabase-js&#39;</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#ff7b72">import</span> { appRoutes } <span style="color:#ff7b72">from</span> <span style="color:#a5d6ff">&#39;./app.routes&#39;</span>;
+</span></span><span style="display:flex;"><span><span style="color:#ff7b72">import</span> { resources } <span style="color:#ff7b72">from</span> <span style="color:#a5d6ff">&#39;./resources&#39;</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#ff7b72">const</span> client <span style="color:#ff7b72;font-weight:bold">=</span> createClient(<span style="color:#a5d6ff">&#39;https://YOUR-PROJECT.supabase.co&#39;</span>, <span style="color:#a5d6ff">&#39;YOUR-PUBLISHABLE-KEY&#39;</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#ff7b72">export</span> <span style="color:#ff7b72">const</span> appConfig: <span style="color:#ff7b72">ApplicationConfig</span> <span style="color:#ff7b72;font-weight:bold">=</span> {
+</span></span><span style="display:flex;"><span>  providers<span style="color:#ff7b72;font-weight:bold">:</span> [
+</span></span><span style="display:flex;"><span>    provideRouter(appRoutes, withComponentInputBinding()),
+</span></span><span style="display:flex;"><span>    providePidrang({
+</span></span><span style="display:flex;"><span>      dataProvider: <span style="color:#ff7b72">provideSupabaseDataProvider</span>({ client }),
+</span></span><span style="display:flex;"><span>      authProvider: <span style="color:#ff7b72">provideSupabaseAuthProvider</span>({ client }),
+</span></span><span style="display:flex;"><span>      resources,
+</span></span><span style="display:flex;"><span>    }),
+</span></span><span style="display:flex;"><span>  ],
+</span></span><span style="display:flex;"><span>};
+</span></span></code></pre></div><p><code>provideSupabaseDataProvider</code> returns a plain object implementing a five-method contract: <code>getList</code>, <code>getOne</code>, <code>create</code>, <code>update</code>, <code>delete</code>. <code>providePidrang</code> is the only place that touches Angular DI. <code>withComponentInputBinding()</code> carries the <code>:resource</code> segment of the next step to the page&rsquo;s input; without it the page renders blank. Use the publishable key, never the secret key: the app runs in the browser.</p>
+<h2 id="4-one-list-page-for-every-table">4. One list page for every table</h2>
+<p>This is where <code>resource()</code> earns its place. <code>injectResourceList</code> wraps <code>DataProvider.getList</code> in Angular&rsquo;s <code>resource()</code>, so <code>value()</code>, <code>isLoading()</code>, <code>error()</code> and <code>reload()</code> are signals. The resource name can itself be a function, so when the route parameter changes, the list reloads.</p>
+<div class="highlight"><pre tabindex="0" style="color:#e6edf3;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-ts" data-lang="ts"><span style="display:flex;"><span><span style="color:#ff7b72">import</span> { Component, computed, input } <span style="color:#ff7b72">from</span> <span style="color:#a5d6ff">&#39;@angular/core&#39;</span>;
+</span></span><span style="display:flex;"><span><span style="color:#ff7b72">import</span> { injectResourceList, injectResources } <span style="color:#ff7b72">from</span> <span style="color:#a5d6ff">&#39;@pidrang/core&#39;</span>;
+</span></span><span style="display:flex;"><span><span style="color:#ff7b72">import</span> { ResourceTable } <span style="color:#ff7b72">from</span> <span style="color:#a5d6ff">&#39;@pidrang/material&#39;</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#ff7b72">type</span> Row <span style="color:#ff7b72;font-weight:bold">=</span> { id: <span style="color:#ff7b72">string</span> } <span style="color:#ff7b72;font-weight:bold">&amp;</span> Record&lt;<span style="color:#7ee787">string</span>, unknown&gt;;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#ff7b72">@Component</span>({
+</span></span><span style="display:flex;"><span>  selector<span style="color:#ff7b72;font-weight:bold">:</span> <span style="color:#a5d6ff">&#39;app-resource-list-page&#39;</span>,
+</span></span><span style="display:flex;"><span>  imports<span style="color:#ff7b72;font-weight:bold">:</span> [ResourceTable],
+</span></span><span style="display:flex;"><span>  template<span style="color:#ff7b72;font-weight:bold">:</span> <span style="color:#a5d6ff">`
+</span></span></span><span style="display:flex;"><span><span style="color:#a5d6ff">    &lt;h1&gt;{{ resource() }}&lt;/h1&gt;
+</span></span></span><span style="display:flex;"><span><span style="color:#a5d6ff">
+</span></span></span><span style="display:flex;"><span><span style="color:#a5d6ff">    @if (list.isLoading()) {
+</span></span></span><span style="display:flex;"><span><span style="color:#a5d6ff">      &lt;p&gt;Loading...&lt;/p&gt;
+</span></span></span><span style="display:flex;"><span><span style="color:#a5d6ff">    }
+</span></span></span><span style="display:flex;"><span><span style="color:#a5d6ff">    @if (list.error(); as error) {
+</span></span></span><span style="display:flex;"><span><span style="color:#a5d6ff">      &lt;p&gt;{{ error.message }}&lt;/p&gt;
+</span></span></span><span style="display:flex;"><span><span style="color:#a5d6ff">    }
+</span></span></span><span style="display:flex;"><span><span style="color:#a5d6ff">
+</span></span></span><span style="display:flex;"><span><span style="color:#a5d6ff">    &lt;pidrang-material-resource-table [fields]=&#34;fields()&#34; [data]=&#34;list.value()?.data ?? []&#34; /&gt;
+</span></span></span><span style="display:flex;"><span><span style="color:#a5d6ff">  `</span>,
+</span></span><span style="display:flex;"><span>})
+</span></span><span style="display:flex;"><span><span style="color:#ff7b72">export</span> <span style="color:#ff7b72">class</span> ResourceListPage {
+</span></span><span style="display:flex;"><span>  <span style="color:#ff7b72">readonly</span> resource <span style="color:#ff7b72;font-weight:bold">=</span> input.required&lt;<span style="color:#7ee787">string</span>&gt;();
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#ff7b72">private</span> <span style="color:#ff7b72">readonly</span> resources <span style="color:#ff7b72;font-weight:bold">=</span> injectResources();
+</span></span><span style="display:flex;"><span>  <span style="color:#ff7b72">protected</span> <span style="color:#ff7b72">readonly</span> list <span style="color:#ff7b72;font-weight:bold">=</span> injectResourceList&lt;<span style="color:#7ee787">Row</span>&gt;(() <span style="color:#ff7b72;font-weight:bold">=&gt;</span> <span style="color:#ff7b72">this</span>.resource());
+</span></span><span style="display:flex;"><span>  <span style="color:#ff7b72">protected</span> <span style="color:#ff7b72">readonly</span> fields <span style="color:#ff7b72;font-weight:bold">=</span> computed(() <span style="color:#ff7b72;font-weight:bold">=&gt;</span> <span style="color:#ff7b72">this</span>.resources.find((resource) <span style="color:#ff7b72;font-weight:bold">=&gt;</span> resource.name <span style="color:#ff7b72;font-weight:bold">===</span> <span style="color:#ff7b72">this</span>.resource())<span style="color:#ff7b72;font-weight:bold">?</span>.fields<span style="color:#ff7b72;font-weight:bold">?</span>.filter((field) <span style="color:#ff7b72;font-weight:bold">=&gt;</span> <span style="color:#ff7b72;font-weight:bold">!</span>field.hidden) <span style="color:#ff7b72;font-weight:bold">??</span> []);
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>Route it with a <code>:resource</code> segment:</p>
+<div class="highlight"><pre tabindex="0" style="color:#e6edf3;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-ts" data-lang="ts"><span style="display:flex;"><span><span style="color:#ff7b72">import</span> { Route } <span style="color:#ff7b72">from</span> <span style="color:#a5d6ff">&#39;@angular/router&#39;</span>;
+</span></span><span style="display:flex;"><span><span style="color:#ff7b72">import</span> { ResourceListPage } <span style="color:#ff7b72">from</span> <span style="color:#a5d6ff">&#39;./resource-list-page&#39;</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#ff7b72">export</span> <span style="color:#ff7b72">const</span> appRoutes: <span style="color:#ff7b72">Route</span>[] <span style="color:#ff7b72;font-weight:bold">=</span> [{ path<span style="color:#ff7b72;font-weight:bold">:</span> <span style="color:#a5d6ff">&#39;:resource&#39;</span>, component: <span style="color:#ff7b72">ResourceListPage</span> }];
+</span></span></code></pre></div><p>Open <code>/products</code>: one column per field. Add a second <code>Resource</code> and <code>/orders</code> works with the same component.</p>
+<p>Paging, sorting and filtering are a second, reactive argument. Return <code>undefined</code> from it to skip loading.</p>
+<div class="highlight"><pre tabindex="0" style="color:#e6edf3;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-ts" data-lang="ts"><span style="display:flex;"><span>injectResourceList&lt;<span style="color:#7ee787">Row</span>&gt;(
+</span></span><span style="display:flex;"><span>  () <span style="color:#ff7b72;font-weight:bold">=&gt;</span> <span style="color:#ff7b72">this</span>.resource(),
+</span></span><span style="display:flex;"><span>  () <span style="color:#ff7b72;font-weight:bold">=&gt;</span> ({
+</span></span><span style="display:flex;"><span>    pagination<span style="color:#ff7b72;font-weight:bold">:</span> { current: <span style="color:#ff7b72">this.page</span>(), pageSize: <span style="color:#ff7b72">20</span> },
+</span></span><span style="display:flex;"><span>    sorters<span style="color:#ff7b72;font-weight:bold">:</span> [{ field<span style="color:#ff7b72;font-weight:bold">:</span> <span style="color:#a5d6ff">&#39;created_at&#39;</span>, order<span style="color:#ff7b72;font-weight:bold">:</span> <span style="color:#a5d6ff">&#39;desc&#39;</span> }],
+</span></span><span style="display:flex;"><span>    filters<span style="color:#ff7b72;font-weight:bold">:</span> [
+</span></span><span style="display:flex;"><span>      { field<span style="color:#ff7b72;font-weight:bold">:</span> <span style="color:#a5d6ff">&#39;in_stock&#39;</span>, operator<span style="color:#ff7b72;font-weight:bold">:</span> <span style="color:#a5d6ff">&#39;eq&#39;</span>, value: <span style="color:#ff7b72">true</span> },
+</span></span><span style="display:flex;"><span>      { field<span style="color:#ff7b72;font-weight:bold">:</span> <span style="color:#a5d6ff">&#39;name&#39;</span>, operator<span style="color:#ff7b72;font-weight:bold">:</span> <span style="color:#a5d6ff">&#39;contains&#39;</span>, value<span style="color:#ff7b72;font-weight:bold">:</span> <span style="color:#a5d6ff">&#39;mouse&#39;</span> },
+</span></span><span style="display:flex;"><span>    ],
+</span></span><span style="display:flex;"><span>  }),
+</span></span><span style="display:flex;"><span>);
+</span></span></code></pre></div><p>Filters are a typed union, one member per operator, so a value that does not fit its operator does not compile.</p>
+<h2 id="5-row-actions">5. Row actions</h2>
+<p><code>ResourceTable</code> projects an <code>#actions</code> template as a trailing column. Add <code>RouterLink</code> to the page&rsquo;s <code>imports</code>, and <code>injectDataProvider</code> from <code>@pidrang/core</code> and <code>signal</code> from <code>@angular/core</code> to its imports:</p>
+<div class="highlight"><pre tabindex="0" style="color:#e6edf3;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-html" data-lang="html"><span style="display:flex;"><span>&lt;<span style="color:#7ee787">pidrang-material-resource-table</span> <span style="color:#f85149">[</span>fields<span style="color:#f85149">]=&#34;</span>fields<span style="color:#f85149">()&#34;</span> <span style="color:#f85149">[</span>data<span style="color:#f85149">]=&#34;</span>list<span style="color:#f85149">.</span>value<span style="color:#f85149">()?.</span>data <span style="color:#f85149">??</span> <span style="color:#f85149">[]&#34;</span>&gt;
+</span></span><span style="display:flex;"><span>  &lt;<span style="color:#7ee787">ng-template</span> <span style="color:#f85149">#</span>actions let-row&gt;
+</span></span><span style="display:flex;"><span>    &lt;<span style="color:#7ee787">a</span> <span style="color:#f85149">[</span>routerLink<span style="color:#f85149">]=&#34;[&#39;/&#39;,</span> resource<span style="color:#f85149">(),</span> row<span style="color:#f85149">.</span>id<span style="color:#f85149">,</span> <span style="color:#f85149">&#39;</span>edit<span style="color:#f85149">&#39;]&#34;</span>&gt;Edit&lt;/<span style="color:#7ee787">a</span>&gt;
+</span></span><span style="display:flex;"><span>    &lt;<span style="color:#7ee787">button</span> type<span style="color:#ff7b72;font-weight:bold">=</span><span style="color:#a5d6ff">&#34;button&#34;</span> <span style="color:#f85149">(</span>click<span style="color:#f85149">)=&#34;</span>remove<span style="color:#f85149">(</span>row<span style="color:#f85149">.</span>id<span style="color:#f85149">)&#34;</span>&gt;Delete&lt;/<span style="color:#7ee787">button</span>&gt;
+</span></span><span style="display:flex;"><span>  &lt;/<span style="color:#7ee787">ng-template</span>&gt;
+</span></span><span style="display:flex;"><span>&lt;/<span style="color:#7ee787">pidrang-material-resource-table</span>&gt;
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#e6edf3;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-ts" data-lang="ts"><span style="display:flex;"><span><span style="color:#ff7b72">private</span> <span style="color:#ff7b72">readonly</span> dataProvider <span style="color:#ff7b72;font-weight:bold">=</span> injectDataProvider();
+</span></span><span style="display:flex;"><span><span style="color:#ff7b72">protected</span> <span style="color:#ff7b72">readonly</span> deleteError <span style="color:#ff7b72;font-weight:bold">=</span> signal&lt;<span style="color:#7ee787">string</span> <span style="color:#f85149">|</span> null&gt;(<span style="color:#79c0ff">null</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#ff7b72">protected</span> <span style="color:#ff7b72">async</span> remove(id: <span style="color:#ff7b72">string</span>)<span style="color:#ff7b72;font-weight:bold">:</span> Promise&lt;<span style="color:#7ee787">void</span>&gt; {
+</span></span><span style="display:flex;"><span>  <span style="color:#ff7b72">if</span> (<span style="color:#ff7b72;font-weight:bold">!</span>confirm(<span style="color:#a5d6ff">&#39;Delete this record?&#39;</span>)) {
+</span></span><span style="display:flex;"><span>    <span style="color:#ff7b72">return</span>;
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>  <span style="color:#ff7b72">try</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#ff7b72">await</span> <span style="color:#ff7b72">this</span>.dataProvider.<span style="color:#ff7b72">delete</span>(<span style="color:#ff7b72">this</span>.resource(), { id });
+</span></span><span style="display:flex;"><span>    <span style="color:#ff7b72">this</span>.deleteError.<span style="color:#ff7b72">set</span>(<span style="color:#79c0ff">null</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#ff7b72">this</span>.list.reload();
+</span></span><span style="display:flex;"><span>  } <span style="color:#ff7b72">catch</span> (error) {
+</span></span><span style="display:flex;"><span>    <span style="color:#ff7b72">this</span>.deleteError.<span style="color:#ff7b72">set</span>(error <span style="color:#ff7b72">instanceof</span> Error <span style="color:#ff7b72;font-weight:bold">?</span> error.message : <span style="color:#ff7b72">String</span>(error));
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>Errors thrown by the Supabase provider are <code>PidrangError</code>s with a <code>category</code> (<code>unauthenticated</code>, <code>forbidden</code>, <code>not-found</code>, <code>unknown</code>), so the page can ask the user to sign in instead of showing a raw PostgREST message.</p>
+<h2 id="6-a-form-that-sends-only-what-changed">6. A form that sends only what changed</h2>
+<p><code>ResourceForm</code> is built on Angular Signal Forms. It never mutates the value you pass in, and its <code>save</code> output only contains the fields the user touched, so the database default or <code>NULL</code> applies to everything else.</p>
+<div class="highlight"><pre tabindex="0" style="color:#e6edf3;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-html" data-lang="html"><span style="display:flex;"><span>&lt;<span style="color:#7ee787">pidrang-material-resource-form</span> mode<span style="color:#ff7b72;font-weight:bold">=</span><span style="color:#a5d6ff">&#34;create&#34;</span> <span style="color:#f85149">[</span>fields<span style="color:#f85149">]=&#34;</span>fields<span style="color:#f85149">()&#34;</span> <span style="color:#f85149">[</span>value<span style="color:#f85149">]=&#34;</span>initialValue<span style="color:#f85149">()&#34;</span> <span style="color:#f85149">(</span>save<span style="color:#f85149">)=&#34;</span>submit<span style="color:#f85149">($</span>event<span style="color:#f85149">)&#34;</span> /&gt;
+</span></span></code></pre></div><p>On <code>edit</code>, <code>save</code> does not emit at all when nothing changed, since there is nothing to <code>PATCH</code>.</p>
+<h2 id="authorization-stays-in-the-database">Authorization stays in the database</h2>
+<p>Pidrang performs no authorization. With Supabase, the Row Level Security policies on your tables decide who reads and writes. Enable RLS on every exposed table before deploying: the publishable key ships to every browser.</p>
+<h2 id="skip-the-typing-generate-it">Skip the typing: generate it</h2>
+<p>The same <code>resources.ts</code> and generic list, create, show and edit pages can be generated from your schema:</p>
+<div class="highlight"><pre tabindex="0" style="color:#e6edf3;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>npx pidrang init
+</span></span></code></pre></div><p>It reads your Supabase schema and asks which tables and actions you want. It offers to install the packages, registers Pidrang in <code>app.config.ts</code>, adds the routes to <code>app.routes.ts</code>, writes the environment files when the app has none, and generates a sign-in page. It never overwrites a file: if one already exists with other content, it stops before writing anything and lists the paths.</p>
+<h2 id="wrap-up">Wrap-up</h2>
+<ul>
+<li><code>resource()</code> plus a reactive resource name gives one list component for every table.</li>
+<li>A typed field list drives both the table and the form.</li>
+<li>The data layer is a five-method contract, so Supabase is a choice, not a requirement.</li>
+</ul>
+<p>Try it with the <a href="https://pidrang.dev/docs/getting-started">getting started guide</a>, or look at the <a href="https://github.com/pidrang/pidrang">repository</a>. Feedback and issues are welcome.</p>
+
+      </div>
+
+      <section class="post-comments" aria-labelledby="post-discussion">
+        <h2 id="post-discussion" class="sr-only">Comments</h2>
+        <p>Comments come from <a class="text-link" href="https://github.com/orgs/pidrang/discussions/209">the discussion on GitHub</a>.</p>
+          <script src="https://giscus.app/client.js"
+          data-repo="pidrang/pidrang"
+          data-repo-id="R_kgDOUX_n1g"
+          data-category="Blog"
+          data-category-id="DIC_kwDOUX_n1s4DJqh0"
+          data-mapping="number"
+          data-term="209"
+          data-reactions-enabled="1"
+          data-emit-metadata="0"
+          data-input-position="bottom"
+          data-theme="dark"
+          data-lang="en"
+          data-loading="lazy"
+          crossorigin="anonymous"
+          async></script>
+
+      </section>
+    </article>
+
+  </main>
+  <footer class="footer">
+    <a href="mailto:contact@pidrang.dev">contact@pidrang.dev</a>
+    <a href="https://github.com/pidrang/pidrang">GitHub</a>
+    <a href="https://www.npmjs.com/org/pidrang">npm</a>
+    <a href="https://github.com/pidrang/pidrang/blob/main/LICENSE">MIT License</a>
+    <a href="/privacy/">Privacy</a>
+    <p class="footer-note">Inspired by Refine. Not affiliated with Angular or Refine.</p>
+  </footer>
+
+  <script data-goatcounter="https://pidrang.goatcounter.com/count"
+          async src="//gc.zgo.at/count.js"></script>
+</body>
+</html>
