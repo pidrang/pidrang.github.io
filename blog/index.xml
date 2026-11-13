@@ -7,6 +7,13 @@
     <language>en</language>
     <atom:link href="https://pidrang.dev/blog/index.xml" rel="self" type="application/rss+xml" />
     <item>
+      <title>Signal-first CRUD in Angular 22: one list page for every table</title>
+      <link>https://pidrang.dev/blog/signal-first-crud-angular/</link>
+      <guid isPermaLink="true">https://pidrang.dev/blog/signal-first-crud-angular/</guid>
+      <pubDate>Fri, 13 Nov 2026 11:45:46 &#43;0000</pubDate>
+      <description>One list page for every table in Angular 22, with Signals and resource(): describe a Supabase table once, then get the list, forms and row actions.</description>
+    </item>
+    <item>
       <title>Pidrang 0.1.1: a working Angular admin from your Supabase schema</title>
       <link>https://pidrang.dev/blog/pidrang-0-1-1/</link>
       <guid isPermaLink="true">https://pidrang.dev/blog/pidrang-0-1-1/</guid>

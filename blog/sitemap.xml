@@ -4,6 +4,10 @@
     <loc>https://pidrang.dev/blog/</loc>
   </url>
   <url>
+    <loc>https://pidrang.dev/blog/signal-first-crud-angular/</loc>
+    <lastmod>2026-11-13</lastmod>
+  </url>
+  <url>
     <loc>https://pidrang.dev/blog/pidrang-0-1-1/</loc>
     <lastmod>2026-11-06</lastmod>
   </url>
@@ -16,5 +20,8 @@
   </url>
   <url>
     <loc>https://pidrang.dev/blog/categories/releases/</loc>
+  </url>
+  <url>
+    <loc>https://pidrang.dev/blog/categories/tutorials/</loc>
   </url>
 </urlset>
